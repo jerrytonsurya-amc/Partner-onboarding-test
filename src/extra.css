@@ -1,0 +1,87 @@
+/* Onboarding-only layout on top of the shared portal styles. */
+.shell{min-height:100vh;display:flex;flex-direction:column}
+.shell main{flex:1;padding-bottom:32px}
+.top{padding:10px 32px}
+.brand-btn{display:flex;align-items:center;gap:10px;border:none;background:none;cursor:pointer;font-weight:700;text-align:left;padding:0;color:var(--text)}
+.brand-btn .logo{width:32px;height:32px;border-radius:8px;background:var(--primary);color:var(--on-primary);display:grid;place-items:center;font-size:13px}
+.brand-btn small{display:block;font-weight:500;color:var(--muted);font-size:11px}
+.content-narrow{width:100%;padding:24px 32px}
+.hero{background:linear-gradient(135deg,var(--primary),#073a6e);color:#fff}
+.hero-in{padding:56px 32px 48px}
+.hero h1{font-size:32px;max-width:760px}
+.hero p{max-width:720px;font-size:16px;opacity:.92}
+.hero .btn{min-height:42px;padding:10px 18px}
+.hero .btn:not(.primary){background:transparent;color:#fff;border-color:rgba(255,255,255,.6)}
+.hero .btn:not(.primary):hover{background:rgba(255,255,255,.12)}
+.hero .btn.primary{background:#fff;color:#0b5cab;border-color:#fff}
+.ticks{list-style:none;margin:0;padding:0}
+.ticks li{padding:4px 0 4px 26px;position:relative}
+.ticks li::before{content:"✓";position:absolute;left:0;color:var(--ok);font-weight:700}
+.steps-list{margin:0;padding-left:20px;columns:2;column-gap:32px}
+.steps-list li{padding:3px 0;break-inside:avoid}
+.success{text-align:center;padding:28px 16px}
+.success .tick{width:56px;height:56px;border-radius:50%;background:var(--ok);color:#fff;font-size:28px;display:grid;place-items:center;margin:0 auto 12px}
+.foot{text-align:center;padding:16px;border-top:1px solid var(--border);background:var(--surface)}
+/* Wizard: vertical step rail on wide screens */
+.wiz{display:grid;grid-template-columns:260px minmax(0,1fr);gap:24px;align-items:start}
+.wiz-nav{position:sticky;top:72px}
+.wiz-nav .stepper{flex-direction:column;overflow:visible;margin:0;gap:6px}
+.wiz-nav .stepper button{flex:none;justify-content:flex-start;padding:10px 12px;font-size:13px;text-align:left}
+@media (max-width:900px){ .wiz{grid-template-columns:1fr;gap:12px} .wiz-nav{position:static} .wiz-nav .stepper{flex-direction:row;overflow-x:auto} .wiz-nav .stepper button{flex:1 0 auto} .content-narrow{padding:20px} .hero-in{padding:40px 20px} .top{padding:10px 20px} }
+@media (max-width:620px){ .top{flex-wrap:nowrap;gap:8px} .brand-btn{min-width:0} .brand-btn>span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .brand-btn small{display:none} .hero h1{font-size:24px} .hero-in{padding:32px 16px} .content-narrow{padding:16px} .steps-list{columns:1} .top{padding:8px 16px} }
+.pan-card{background:var(--ok-soft);border-color:var(--ok);box-shadow:none}
+/* Verified field: green border + tick inside the input */
+.verify-box{position:relative}
+.verify-box.is-ok input{border-color:var(--ok);padding-right:44px}
+.verify-tick{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:6px;background:var(--ok);color:#fff;display:grid;place-items:center;font-size:14px;font-weight:700;pointer-events:none}
+/* Choice cards (bank step) */
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--radius);background:var(--surface);cursor:pointer;color:var(--text)}
+.opt:hover{border-color:var(--primary)}
+.opt.on{border-color:var(--primary);background:var(--primary-soft)}
+.opt b{display:block;margin-bottom:2px}
+.opt-dot{flex:none;width:18px;height:18px;border-radius:50%;border:2px solid var(--border);margin-top:2px;background:var(--surface)}
+.opt.on .opt-dot{border-color:var(--primary);box-shadow:inset 0 0 0 3px var(--surface);background:var(--primary)}
+.readout{min-height:36px;padding:8px 10px;border:1px dashed var(--border);border-radius:8px;background:var(--surface-2)}
+/* Timeline: stage currently in progress */
+.timeline li.current::before{background:var(--primary-soft);border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+/* DigiLocker redirect loader */
+.loader{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:48px 16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface-2)}
+.loader-ring{width:48px;height:48px;border-radius:50%;border:4px solid var(--primary-soft);border-top-color:var(--primary);animation:kc-spin .9s linear infinite;margin-bottom:8px}
+@keyframes kc-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.loader-ring{animation:none}}
+/* e-Aadhaar card */
+.aadhaar-card{border-radius:12px;overflow:hidden;border:1px solid var(--border);background:#fffdf7;color:#1a1a1a;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.ac-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:linear-gradient(90deg,#f4a340,#fbe7c6 45%,#cfe9d2);font-weight:700;font-size:15px}
+.ac-body{display:flex;gap:14px;padding:16px 14px;flex:1}
+.ac-photo{width:84px;height:100px;border-radius:6px;background:#e9edf3;color:#56627a;display:grid;place-items:center;font-weight:700;font-size:24px;flex:none;border:1px solid #d5dbe5}
+.ac-info{display:grid;grid-template-columns:max-content 1fr;gap:4px 12px;margin:0;align-content:start}
+.ac-info dt{color:#5b6576;font-size:12px}
+.ac-info dd{margin:0;font-weight:600}
+.ac-num{text-align:center;font:700 20px/1 ui-monospace,Consolas,monospace;letter-spacing:.12em;padding:12px;border-top:2px solid #e74c3c}
+/* Declaration checkboxes (KYC step) */
+.decl{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1.5px solid var(--border);border-radius:var(--radius);cursor:pointer;background:var(--surface)}
+.decl:hover{border-color:var(--primary)}
+.decl.on{border-color:var(--ok);background:var(--ok-soft)}
+.decl input{width:18px;height:18px;margin-top:2px;flex:none}
+.decl b{display:block;margin-bottom:2px}
+.success.rejected .tick{background:var(--err)}
+.timeline li.rejected::before{background:var(--err);border-color:var(--err)}
+.ok-tick{color:var(--ok);font-weight:700;margin-left:4px}
+.tnc{margin:0;padding-left:20px;display:grid;gap:10px}
+.tnc-link{color:var(--primary);text-decoration:underline}
+/* Brand logo in the header */
+.brand-logo{height:34px;width:auto;display:block;flex:none}
+.brand-sub{font-weight:600;color:var(--muted);font-size:13px;padding-left:12px;border-left:1px solid var(--border);line-height:1.3}
+.brand-sub small{display:block;font-weight:500;font-size:11px}
+:root[data-theme="dark"] .brand-logo{background:#fff;border-radius:6px;padding:3px 6px;box-sizing:content-box}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .brand-logo{background:#fff;border-radius:6px;padding:3px 6px;box-sizing:content-box} }
+@media (max-width:620px){ .brand-logo{height:28px} .brand-sub{display:none} }
+/* Agent ID on the success screen */
+.agent-id{display:inline-flex;align-items:center;gap:12px;padding:10px 16px;border:1.5px dashed var(--ok);border-radius:var(--radius);background:var(--ok-soft)}
+.agent-id b{font-size:20px;letter-spacing:.04em}
+.howto{margin:0;padding-left:20px;display:grid;gap:8px}
+.verify-box input[readonly]{background:var(--surface-2)}
+/* Aadhaar photo */
+.id-photo{width:100%;height:100%;object-fit:cover;display:block}
+.ac-photo{overflow:hidden;padding:0}
+.agent-creds{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}

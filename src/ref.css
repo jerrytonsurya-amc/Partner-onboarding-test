@@ -1,0 +1,270 @@
+/* ==========================================================================
+   Reference theme ("Insurance Agent Portal" UI): cream page, near-black text,
+   warm yellow primary, summary strip, chevron stepper, outlined floating-label
+   fields. Loaded after ds.css on every page and re-points its tokens.
+   ========================================================================== */
+:root{
+  /* Accent (yellow) */
+  --ds-p-100:#fff8e5; --ds-p-200:#ffefc2; --ds-p-300:#ffe08a; --ds-p-400:#ffc933; --ds-p-500:#f8b904; --ds-p-600:#e3a800; --ds-p-700:#b98700;
+  /* "Secondary" now carries the text + selection colours */
+  --ds-s-100:#fff6dc; --ds-s-200:#ffe9a8; --ds-s-300:#ffd866; --ds-s-400:#c9a13a; --ds-s-500:#1d1d1f; --ds-s-600:#7a5600; --ds-s-700:#333336; --ds-s-800:#000000;
+  /* Neutrals */
+  --ds-n-100:#fafafa; --ds-n-200:#fffbf2; --ds-n-300:#ebebeb; --ds-n-400:#e2e2e2; --ds-n-500:#d6d6d6; --ds-n-600:#b4b4b4; --ds-n-700:#8e8e8e; --ds-n-800:#666666; --ds-n-900:#444444;
+  /* Status */
+  --ds-pos-100:#e8f6ec; --ds-pos-500:#2e9e4f; --ds-pos-600:#1f8a3f; --ds-pos-700:#18733a;
+  --ds-warn-100:#fff4dc; --ds-warn-500:#f5a623; --ds-warn-700:#a35f00;
+  --ds-err-100:#fdecea; --ds-err-500:#e53935; --ds-err-600:#c62828;
+  --ds-link:#7a5600;
+  --bg:#fffbf2; --shadow:0 2px 10px rgba(60,40,0,.06); --radius:10px;
+}
+body{background:var(--bg)}
+h1{font-weight:600}
+
+/* ---------- Header ---------- */
+.top{background:#fff;border-bottom:1px solid #f1e6c8}
+
+/* ---------- Buttons: 44px, radius 6, yellow primary / white outlined secondary ---------- */
+.btn{min-height:44px;border-radius:6px;font-size:14px;font-weight:600;background:#fff;border:1px solid #cfcfcf;color:#1d1d1f;padding:0 20px}
+.btn:hover{background:#fafafa;border-color:#b9b9b9}
+.btn.primary{background:var(--ds-p-500);border-color:var(--ds-p-500);color:#1d1d1f}
+.btn.primary:hover{background:var(--ds-p-400);border-color:var(--ds-p-400)}
+.btn.sm{min-height:36px;padding:0 14px;font-size:13px}
+.btn.link{color:var(--ds-link);font-weight:600}
+.btn:disabled,.btn:disabled:hover{background:#f6f6f6;border-color:#e6e6e6;color:#b4b4b4}
+
+/* ---------- Fields: white outlined boxes, label floats inside at top-left ---------- */
+input,select,textarea{background:#fff;border:1px solid #d6d6d6;border-radius:6px;color:#1d1d1f;font-weight:500}
+input:focus,select:focus,textarea:focus{border-color:var(--ds-p-500);box-shadow:0 0 0 3px rgba(248,185,4,.18);background:#fff}
+input:disabled,select:disabled,input[readonly]{background:#fafafa;color:#666}
+input[type=checkbox],input[type=radio]{accent-color:#e3a800}
+.field:has(> input:not([type=file]):not([type=checkbox]):not([type=radio])),.field:has(> select),.field:has(> textarea),.field:has(> .verify-box){position:relative}
+.field:has(> input:not([type=file]):not([type=checkbox]):not([type=radio])) > span,.field:has(> select) > span,.field:has(> textarea) > span,.field:has(> .verify-box) > span{
+  position:absolute;left:12px;top:7px;margin:0;font-size:10.5px;line-height:1.2;color:#8e8e8e;font-weight:500;pointer-events:none;z-index:1;max-width:calc(100% - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.field:has(> input:not([type=file]):not([type=checkbox]):not([type=radio])) > input,.field:has(> select) > select,.field:has(> .verify-box) .verify-box input{padding:22px 12px 7px;min-height:52px}
+.field:has(> textarea) > textarea{padding-top:24px}
+.field:focus-within > span{color:#a87a00}
+.field:has(.errt) input,.field:has(.errt) select{border-color:var(--ds-err-500)}
+.gst-fields{align-items:start}
+.file-field{position:relative}
+.file-field>span:first-child{position:absolute;left:12px;top:6px;margin:0;font-size:10.5px;line-height:1;color:#8e8e8e;font-weight:500;pointer-events:none;z-index:2;max-width:calc(100% - 24px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-field>.file-face{display:flex;align-items:flex-end;gap:10px;height:52px;margin:0;padding:0 12px 6px;border:1px solid #d6d6d6;border-radius:6px;background:#fff;position:relative;box-sizing:border-box}
+.file-field>.file-face>input[type=file]{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border:0;min-height:0;opacity:0;cursor:pointer}
+.file-field .file-btn,.file-field .file-name{position:relative;z-index:0;pointer-events:none}
+.file-field .file-btn{display:inline-flex;align-items:center;height:18px;margin:0;padding:0 8px;border:1px solid #bdbdbd;border-radius:4px;background:#f3f3f3;font-size:12px;font-weight:500;color:#1d1d1f;flex:none}
+.file-field .file-name{margin:0;font-size:13px;font-weight:500;color:#666;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-field:focus-within>span:first-child{color:#a87a00}
+.file-field:focus-within .file-face{border-color:var(--ds-p-500);box-shadow:0 0 0 3px rgba(248,185,4,.18)}
+.verify-box.is-ok input{border-color:var(--ds-pos-500)}
+
+/* ---------- Cards ---------- */
+.card{border:1px solid #efe7d4;border-radius:10px;box-shadow:var(--shadow)}
+.rv-card{border-color:#efe7d4;border-radius:10px}
+.rv-edit{color:#1d1d1f;text-decoration:underline;text-underline-offset:3px}
+
+/* ---------- Summary strip ---------- */
+.sum-strip{display:grid;grid-template-columns:minmax(260px,1.3fr) minmax(200px,1fr) minmax(170px,auto) minmax(130px,auto);align-items:center;gap:20px;
+  background:#fff6dc;border:1px solid #f3dc9a;border-radius:12px;padding:16px 20px;margin-bottom:18px}
+.sum-id{display:flex;align-items:center;gap:14px;min-width:0}
+.sum-tile{flex:none;width:52px;height:52px;border-radius:10px;background:#fff;border:1px solid #f3dc9a;color:#b98700;display:grid;place-items:center}
+.sum-id-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sum-sub{font-size:12px;color:#666;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sum-title{font-size:17px;font-weight:600;color:#1d1d1f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sum-tag{align-self:flex-start;margin-top:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;background:#1d1d1f;color:#fff}
+.sum-tag.warn{background:#e53935;color:#fff}
+.sum-tag.info{background:#7a5600;color:#fff}
+.sum-tag.ok{background:#2e9e4f;color:#fff}
+.sum-tag.err{background:#c62828;color:#fff}
+.sum-lines{display:flex;flex-direction:column;gap:6px;min-width:0}
+.sum-line{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:#1d1d1f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sum-line svg{color:#b98700;flex:none}
+.sum-fig{display:flex;flex-direction:column;align-items:flex-end;text-align:right}
+.sum-fig b{font-size:26px;font-weight:700;color:#1d1d1f;line-height:1.2}
+.sum-fig-l{font-size:11px;color:#666}
+.sum-fig-s{font-size:12px;color:#444}
+.sum-box{display:flex;flex-direction:column;align-items:center;text-align:center;background:#fff;border:1px solid #f3dc9a;border-radius:10px;padding:10px 16px}
+.sum-box b{font-size:18px;font-weight:700;color:#1d1d1f}
+@media (max-width:1000px){ .sum-strip{grid-template-columns:1fr 1fr} .sum-fig{align-items:flex-start;text-align:left} }
+@media (max-width:620px){ .sum-strip{grid-template-columns:1fr;gap:12px} .sum-box{align-items:flex-start;text-align:left} }
+
+/* ---------- Chevron stepper ---------- */
+.chev-row{display:flex;align-items:center;gap:16px;margin-bottom:18px}
+.chev{display:flex;flex:1;min-width:0;margin:0;padding:0;list-style:none;overflow-x:auto}
+.chev li{flex:1 0 auto;margin-left:-6px}
+.chev li:first-child{margin-left:0}
+.chev button{width:100%;display:flex;align-items:center;gap:8px;height:40px;padding:0 22px 0 26px;border:none;background:#f0f0f0;color:#555;font:inherit;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%,14px 50%)}
+.chev li:first-child button{padding-left:14px;border-radius:6px 0 0 6px;clip-path:polygon(0 0,calc(100% - 14px) 0,100% 50%,calc(100% - 14px) 100%,0 100%)}
+.chev button .n{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#1d1d1f;font-size:11px;font-weight:700;border:1px solid #d6d6d6}
+.chev button.done{background:#fff1c9;color:#1d1d1f}
+.chev button.done .n{background:#2e9e4f;border-color:#2e9e4f;color:#fff}
+.chev button.cur{background:var(--ds-p-500);color:#1d1d1f;font-weight:600}
+.chev button.cur .n{border-color:#1d1d1f}
+.chev button:disabled{cursor:not-allowed;color:#999}
+.chev button:focus-visible{outline:2px solid #1d1d1f;outline-offset:-4px}
+.chev-actions{flex:none;display:flex;gap:10px}
+.wiz-card{padding:24px}
+@media (max-width:900px){ .chev-row{flex-direction:column;align-items:stretch} .chev-actions{justify-content:flex-end} }
+
+/* ---------- Chips, choice cards, declarations ---------- */
+.chip{border-radius:6px;border-color:#d6d6d6;color:#1d1d1f}
+.chip:hover{background:#fff8e5;border-color:var(--ds-p-500)}
+.chip.on{background:#fff6dc;border-color:var(--ds-p-500);color:#1d1d1f;box-shadow:inset 0 0 0 1px var(--ds-p-500)}
+.opt{border-radius:8px}
+.opt.on,.comm.on{border-color:var(--ds-p-500);background:#fff8e5}
+.opt.on .opt-dot{border-color:#e3a800;background:#e3a800}
+.decl.on{border-color:var(--ds-pos-500);background:var(--ds-pos-100)}
+.ap-tag{color:#1d1d1f}
+
+/* ---------- Stepper (older vertical one), tabs, tables, timeline ---------- */
+.tabs button.on{color:#1d1d1f;border-bottom-color:var(--ds-p-500)}
+th{background:#fffaf0;color:#1d1d1f}
+td{color:#1d1d1f}
+.timeline li::before{border-color:#e3a800}
+
+/* ---------- Popups ---------- */
+.modal.pop .pop-ico{background:#fff6dc;color:#b98700}
+.modal .x{color:#1d1d1f}
+.toast{background:#1d1d1f}
+
+/* ---------- Landing hero (cream with an accent word, like the reference) ---------- */
+.hero{background:linear-gradient(135deg,#fff6dc 0%,#fffbf2 60%,#fff 100%);color:#1d1d1f;border-bottom:1px solid #f1e6c8}
+.hero h1{color:#1d1d1f;font-weight:700}
+.hero h1 .accent{color:#f04e23}
+.hero p{color:#444;opacity:1}
+.hero .small{color:#666}
+.hero .btn.primary{background:var(--ds-p-500);border-color:var(--ds-p-500);color:#1d1d1f}
+.hero .btn:not(.primary){background:#fff;color:#1d1d1f;border-color:#cfcfcf}
+
+/* ---------- Approver + agent portal ---------- */
+.qc-tab{border-color:#efe7d4}
+.qc-tab.on{border-color:var(--ds-p-500);background:#fff6dc}
+.qc-tab.on .qc-tab-l{color:#1d1d1f}
+.qc-tab.info .qc-tab-n{color:#7a5600}
+.ap,.ap-main{background:var(--bg)}
+.ap-top{background:#fff;border-bottom-color:#f1e6c8}
+.ap-table-wrap{background:#fff;border-color:#efe7d4}
+.ap-table th{background:#fff}
+.ap-table td{background:#fffdf7}
+.ap-link{color:#1d1d1f;text-decoration:underline;text-underline-offset:3px}
+.ap-pill.info{background:#fff4d6;color:#7a5600}
+.drawer-item.on,.ap-nav.on{background:#fff6dc;color:#1d1d1f}
+.qc-actions{background:#fff;border-top-color:#f1e6c8}
+.badge.info,.badge.pri{background:#fff4d6;color:#7a5600}
+.pan-card{background:var(--ds-pos-100)}
+.agent-id{border-color:#2e9e4f}
+.chev{scrollbar-width:none}.chev::-webkit-scrollbar{display:none}
+.success-mark{display:block;margin:0 auto 16px}
+/* ---------- Stepper: circles + connectors, "STEP n" / title / status underneath ---------- */
+.stp{display:flex;flex:1;min-width:0;margin:0;padding:6px 4px 2px;list-style:none;overflow-x:auto;scrollbar-width:none}
+.stp::-webkit-scrollbar{display:none}
+.stp li{flex:1 0 150px;min-width:150px}
+.stp li:last-child{flex:0 0 auto;min-width:130px}
+.stp button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;border:none;background:none;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.stp button:disabled{cursor:default}
+.stp button:focus-visible{outline:2px solid #0b6bcb;outline-offset:4px;border-radius:6px}
+.stp-top{display:flex;align-items:center;width:100%;margin-bottom:14px}
+.stp-dot{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#a8cdfb;box-sizing:border-box}
+.stp-line{flex:1;height:3px;border-radius:2px;margin:0 16px;background:#a8cdfb}
+.stp-line.done{background:#0e8a6e}
+.stp-line.half{background:linear-gradient(90deg,#0b6bcb 50%,#a8cdfb 50%)}
+.stp-done .stp-dot{background:#0e8a6e}
+.stp-cur .stp-dot{background:#fff;border:2px solid #0b6bcb;box-shadow:inset 0 0 0 4px #fff,inset 0 0 0 20px #0b6bcb}
+.stp-k{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#6b6b6b}
+.stp-t{font-size:15px;font-weight:500;color:#1d1d1f;white-space:nowrap}
+.stp-s{font-size:12px;font-weight:500;color:#8a8a8a;margin-top:4px}
+.stp-done .stp-s{color:#0e8a6e}
+.stp-cur .stp-s{color:#0b6bcb}
+.stp-done button:hover .stp-t{text-decoration:underline;text-underline-offset:3px}
+.chev-row:has(.stp){align-items:flex-start;background:#fff;border:1px solid #efe7d4;border-radius:12px;padding:20px 22px;box-shadow:var(--shadow)}
+@media (max-width:900px){ .chev-row:has(.stp){flex-direction:column} }
+.stp li{flex:1 1 0;min-width:104px}
+.stp li:last-child{flex:0 0 auto;min-width:104px;max-width:140px}
+.stp-t{white-space:normal;line-height:1.3}
+@media (max-width:1100px){ .chev-row:has(.stp){flex-direction:column;align-items:stretch} .chev-row:has(.stp) .chev-actions{justify-content:flex-end} }
+@media (max-width:700px){ .stp li{min-width:96px} .stp-line{margin:0 10px} .stp-t{font-size:13px} }
+/* ---------- Progress (wizard header) ---------- */
+.prog{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:4px 14px;background:#fff;border:1px solid #efe7d4;border-radius:12px;padding:14px 18px;margin-bottom:14px}
+.prog b{justify-self:end;font-size:15px}
+.prog-bar{grid-column:1/-1;height:8px;border-radius:99px;background:#f3ecd9;overflow:hidden}
+.prog-bar i{display:block;height:100%;background:#33b540;border-radius:99px;transition:width .3s}
+/* ---------- OTP boxes ---------- */
+.otp-boxes{display:flex;gap:10px}
+.otp-boxes input{width:48px;height:52px;padding:0;text-align:center;font-size:20px;font-weight:600;border:1px solid #d6d6d6;border-radius:8px;background:#fff;color:#1d1d1f}
+.otp-boxes input:focus{outline:none;border-color:#1d1d1f;box-shadow:0 0 0 3px #fff1c9}
+.otp-boxes.bad input{border-color:var(--ds-neg-500,#d93025)}
+@media (max-width:420px){ .otp-boxes{gap:6px} .otp-boxes input{width:40px;height:46px} }
+/* ---------- Verified tick (green ring) inside fields ---------- */
+.verify-tick{background:none!important;width:auto;height:auto;right:12px}
+.verify-tick .tick-mark{display:block}
+/* ---------- PAN result / IFSC link / popup loader ---------- */
+.pan-name{display:flex;flex-direction:column;gap:2px;margin-top:2px}
+.pan-name b{font-size:15px;letter-spacing:.02em}
+.ifsc-wrap{display:flex;flex-direction:column;gap:4px}
+.ifsc-link .btn{padding:0;min-height:0;height:auto;font-size:13px}
+.loader-pop{max-width:380px}
+.loader-pop .loader{border:none;background:none;padding:36px 20px}
+.loader-pop .loader:not(:has(h3)) .loader-ring{margin-bottom:0}
+/* ---------- Status stepper (after submission) ---------- */
+.stp-item{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
+.stp-status li{min-width:120px}
+.stp-d{font-size:11.5px;color:#8a8a8a;line-height:1.35;margin-top:2px;padding-right:12px}
+.stp-rej .stp-dot{background:#d93025;color:#fff;font-weight:700}
+.stp-rej .stp-s{color:#d93025}
+/* ---------- Uniform green-ring tick everywhere ---------- */
+.chev button .n.n-ok{background:none;border:none;width:22px;height:22px}
+.chev button .n-ok .tick-mark{background:#fff;border-radius:50%}
+.stp-done .stp-dot{background:none}
+.stp-done .stp-dot .tick-mark{background:#fff;border-radius:50%}
+.ticks li::before{content:"";top:6px;width:18px;height:18px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='40.5' fill='none' stroke='%2333b540' stroke-width='9'/%3E%3Cpath d='M30 51 L43 64 L71 36' fill='none' stroke='%2333b540' stroke-width='10' stroke-linecap='square'/%3E%3C/svg%3E") no-repeat center/contain}
+.ok-t,.file-ok,.pw-rules li span{display:inline-flex;align-items:center;gap:5px;vertical-align:middle}
+.pan-name b{color:#1e8e3e;font-weight:600}
+/* IFSC link beside the box */
+.ifsc-wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;column-gap:14px}
+.ifsc-wrap .ifsc-link{padding-top:16px;white-space:nowrap}
+/* Email stays on one line in review cards */
+.kv dd .one-line{white-space:nowrap}
+@media (min-width:600px){ .kv-i:has(.one-line){grid-column:span 2} }
+.ap-menu{min-width:0;padding:8px}
+/* ---------- Success moment: ring draws → check strokes → one pulse; copy settles; Agent ID is "issued" ---------- */
+.success-mark{overflow:visible}
+.success-mark .sm-ring,.success-mark .sm-check{stroke-dasharray:1;stroke-dashoffset:0}
+.success-mark .sm-ring{transform:rotate(-90deg);transform-origin:center;transform-box:fill-box;animation:sm-draw .62s cubic-bezier(.65,0,.35,1) .08s both}
+.success-mark .sm-check{animation:sm-draw .34s cubic-bezier(.16,1,.3,1) .62s both}
+.success-mark .sm-pulse{opacity:0;transform-origin:center;transform-box:fill-box;animation:sm-pulse .9s cubic-bezier(.16,1,.3,1) .8s both}
+@keyframes sm-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes sm-pulse{0%{opacity:0;transform:scale(.86)}10%{opacity:.24}100%{opacity:0;transform:scale(1.55)}}
+.success > :not(.success-mark){animation:sm-settle .5s cubic-bezier(.16,1,.3,1) var(--d,0s) both}
+.success > h1{--d:.7s}
+.success > h1 + p{--d:.78s}
+.success > .agent-id{animation:sm-issue .6s cubic-bezier(.16,1,.3,1) .92s both}
+.success > .agent-id b{animation:sm-code .7s cubic-bezier(.16,1,.3,1) 1.05s both}
+.success > .agent-id + p{--d:1.08s}
+.success > .row{--d:1.16s}
+.success ~ *{animation:sm-settle .5s cubic-bezier(.16,1,.3,1) 1.28s both}
+@keyframes sm-settle{from{opacity:0;transform:translateY(10px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
+@keyframes sm-issue{from{clip-path:inset(0 100% 0 0 round 8px);opacity:.4}to{clip-path:inset(0 0 0 0 round 8px);opacity:1}}
+@keyframes sm-code{from{letter-spacing:.32em;opacity:0}to{letter-spacing:.04em;opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  .success-mark .sm-ring,.success-mark .sm-check{animation:none}
+  .success-mark .sm-pulse{display:none}
+  .success > :not(.success-mark),.success > .agent-id,.success > .agent-id b,.success ~ *{animation:sm-fade .3s ease-out both;animation-delay:0s}
+}
+@keyframes sm-fade{from{opacity:0}to{opacity:1}}
+/* ---------- Application status: ticks fill in one by one, each line runs on to the next step ---------- */
+.stp-status{--t0:1.5s;--step:.3s}
+.stp-status li{--at:calc(var(--t0) + var(--i) * var(--step))}
+.stp-status .stp-dot{animation:stp-pop .32s cubic-bezier(.16,1,.3,1) var(--at) both}
+.stp-status .stp-done .tick-mark circle{stroke-dasharray:1;transform:rotate(-90deg);transform-origin:center;transform-box:fill-box;animation:sm-draw .26s cubic-bezier(.65,0,.35,1) var(--at) both}
+.stp-status .stp-done .tick-mark path{stroke-dasharray:1;animation:sm-draw .16s cubic-bezier(.16,1,.3,1) calc(var(--at) + .2s) both}
+.stp-status .stp-line{transform-origin:left center;animation:stp-fill .22s linear calc(var(--at) + .12s) both}
+.stp-status .stp-k,.stp-status .stp-t,.stp-status .stp-s,.stp-status .stp-d{animation:sm-settle .36s cubic-bezier(.16,1,.3,1) var(--at) both}
+.stp-status .stp-cur .stp-dot{animation:stp-pop .32s cubic-bezier(.16,1,.3,1) var(--at) both,stp-live 1.8s ease-in-out calc(var(--at) + .4s) 3}
+@keyframes stp-pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes stp-fill{from{transform:scaleX(0)}to{transform:none}}
+@keyframes stp-live{0%,100%{box-shadow:inset 0 0 0 4px #fff,inset 0 0 0 20px #0b6bcb,0 0 0 0 rgba(11,107,203,.28)}50%{box-shadow:inset 0 0 0 4px #fff,inset 0 0 0 20px #0b6bcb,0 0 0 7px rgba(11,107,203,0)}}
+@media (prefers-reduced-motion:reduce){
+  .stp-status .stp-dot,.stp-status .stp-line,.stp-status .tick-mark circle,.stp-status .tick-mark path,.stp-status .stp-k,.stp-status .stp-t,.stp-status .stp-s,.stp-status .stp-d{animation:sm-fade .3s ease-out both}
+}
+.stp-status li,.stp-status li:last-child{flex:1 1 0;min-width:84px;max-width:none;padding-right:10px}
+.stp-status .stp-t{font-size:14px;overflow-wrap:anywhere}
+.stp-status .stp-line{margin:0 10px}

@@ -1,0 +1,179 @@
+/* ==========================================================================
+   Design system layer (from "Design System | SANTAM B2B Portal")
+   Loaded last on every page. Tokens come from the file's Color page;
+   type is Poppins; buttons, inputs, popups and badges follow its components.
+   ========================================================================== */
+:root{
+  /* Brand primary (yellow) */
+  --ds-p-100:#fffaee; --ds-p-200:#ffefcc; --ds-p-300:#ffe5aa; --ds-p-400:#ffd747; --ds-p-500:#febd27; --ds-p-600:#feb101; --ds-p-700:#f99c15;
+  /* Brand secondary (navy) */
+  --ds-s-100:#f2f4fb; --ds-s-200:#d8def3; --ds-s-300:#bec9eb; --ds-s-400:#7087d3; --ds-s-500:#002469; --ds-s-600:#161c91; --ds-s-700:#2c438f; --ds-s-800:#1c2b5b;
+  /* Neutral */
+  --ds-n-100:#fcfcfd; --ds-n-200:#f5f7fa; --ds-n-300:#eceff5; --ds-n-400:#e5eaf0; --ds-n-500:#d8dfe9; --ds-n-600:#b8c0cc; --ds-n-700:#949ca8; --ds-n-800:#656a76; --ds-n-900:#4a5160;
+  /* Semantic */
+  --ds-pos-100:#ebf9ee; --ds-pos-500:#3db759; --ds-pos-600:#059226; --ds-pos-700:#00780d;
+  --ds-warn-100:#fffaea; --ds-warn-500:#fcc41c; --ds-warn-700:#af7700;
+  --ds-err-100:#fff2f2; --ds-err-500:#ec4a4a; --ds-err-600:#b91717;
+  --ds-link:#277efc; --ds-info:#0364ef;
+
+  /* Map onto the app's tokens */
+  --bg:var(--ds-n-200); --surface:#ffffff; --surface-2:var(--ds-n-200); --text:var(--ds-s-500); --muted:var(--ds-n-800); --border:var(--ds-n-300);
+  --primary:var(--ds-s-500); --primary-2:var(--ds-s-800); --primary-soft:var(--ds-s-100); --on-primary:#ffffff;
+  --ok:var(--ds-pos-700); --ok-soft:var(--ds-pos-100); --warn:var(--ds-warn-700); --warn-soft:var(--ds-warn-100); --err:var(--ds-err-600); --err-soft:var(--ds-err-100);
+  --info:var(--ds-s-600); --info-soft:var(--ds-s-100);
+  --radius:12px; --shadow:0 4px 16px rgba(0,36,105,.06);
+}
+body{font-family:Poppins,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--text)}
+h1{font-size:28px;font-weight:600;line-height:1.35;color:var(--text)}
+h2{font-size:18px;font-weight:600;color:var(--text)}
+h3{font-size:16px;font-weight:600;color:var(--text)}
+a{color:var(--ds-link)}
+.muted{color:var(--muted)}
+
+/* ---------- Buttons: 48px, radius 8, Poppins SemiBold ---------- */
+.btn{min-height:48px;padding:0 24px;border-radius:8px;font-weight:600;font-size:15px;gap:6px;border:1px solid transparent;background:var(--ds-n-300);color:var(--ds-s-500);transition:background .15s,border-color .15s}
+.btn:hover{background:var(--ds-n-400)}
+.btn.primary{background:var(--ds-p-500);border-color:var(--ds-p-500);color:var(--ds-s-500)}
+.btn.primary:hover{background:var(--ds-p-400);border-color:var(--ds-p-400)}
+.btn.danger{background:#fff;border-color:var(--ds-err-500);color:var(--ds-err-500)}
+.btn.danger:hover{background:var(--ds-err-100)}
+.btn.ok{background:#fff;border-color:var(--ds-pos-500);color:var(--ds-pos-700)}
+.btn.sm{min-height:36px;padding:0 14px;font-size:13px}
+.btn.link{background:none;border:none;color:var(--ds-link);min-height:0;padding:0;font-weight:500}
+.btn.link:hover{background:none;text-decoration:underline}
+.btn:disabled,.btn:disabled:hover{background:var(--ds-n-100);border-color:var(--ds-n-300);color:var(--ds-n-600);opacity:1;cursor:not-allowed}
+.btn:focus-visible{outline:2px solid var(--ds-s-600);outline-offset:2px}
+
+/* ---------- Inputs: filled box, 48px, radius 8 ---------- */
+input,select,textarea{min-height:48px;padding:12px 14px;border:1px solid var(--ds-n-300);border-radius:8px;background:var(--ds-n-200);color:var(--ds-s-500);font-size:14px;font-weight:500}
+textarea{min-height:88px}
+input::placeholder,textarea::placeholder{color:var(--ds-n-600);font-weight:400}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ds-s-500);background:#fff;box-shadow:0 0 0 3px rgba(0,36,105,.08)}
+input:disabled,select:disabled,input[readonly]{background:var(--ds-n-100);color:var(--ds-n-700)}
+input[type=checkbox],input[type=radio]{accent-color:var(--ds-s-500);min-height:0;width:18px;height:18px}
+input[type=file]{padding:10px;background:#fff;font-weight:400}
+.field>span{font-size:12px;font-weight:500;color:var(--ds-n-800);margin-bottom:6px;text-transform:none;letter-spacing:0}
+.field .hint{font-size:11px;color:var(--ds-n-700);margin-top:6px}
+.field .errt{font-size:11px;color:var(--ds-err-500);margin-top:6px}
+.field:has(.errt) input,.field:has(.errt) select{border-color:var(--ds-err-500);background:#fff}
+.verify-box.is-ok input{border-color:var(--ds-pos-500);background:#fff}
+.verify-tick{background:var(--ds-pos-500)}
+
+/* ---------- Cards, notes, badges ---------- */
+.card{border:1px solid var(--ds-n-300);border-radius:12px;box-shadow:var(--shadow);background:#fff}
+.card-h h2{font-size:16px}
+.note{border-radius:8px;border-left-width:4px;font-size:13px;color:var(--ds-s-500)}
+.note.ok{background:var(--ds-pos-100);border-color:var(--ds-pos-500)}
+.note.warn{background:var(--ds-warn-100);border-color:var(--ds-warn-500)}
+.note.err{background:var(--ds-err-100);border-color:var(--ds-err-500)}
+.note.info{background:var(--ds-s-100);border-color:var(--ds-s-500)}
+.badge{border-radius:6px;font-weight:500;padding:2px 10px}
+.badge.ok{background:var(--ds-pos-100);color:var(--ds-pos-700)}
+.badge.warn{background:var(--ds-warn-100);color:var(--ds-warn-700)}
+.badge.err{background:var(--ds-err-100);color:var(--ds-err-600)}
+.badge.info,.badge.pri{background:var(--ds-s-100);color:var(--ds-s-600)}
+.chip{border:1px solid var(--ds-n-500);border-radius:8px;padding:6px 14px;font-size:13px;font-weight:500;color:var(--ds-s-500);background:#fff}
+.chip:hover{background:var(--ds-s-100);border-color:var(--ds-s-600)}
+.chip.on{background:var(--ds-s-500);border-color:var(--ds-s-500);color:#fff}
+
+/* ---------- Details: label over value (review pattern) ---------- */
+.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px 24px;margin:0}
+.kv.kv-1{grid-template-columns:1fr}
+.kv-i{min-width:0}
+.kv dt{font-size:12px;font-weight:400;color:var(--ds-n-800);margin-bottom:2px}
+.kv dd{margin:0;font-size:14px;font-weight:500;color:var(--ds-s-500);overflow-wrap:anywhere}
+
+/* ---------- Popup (design-system layout) ---------- */
+.modal-bg{background:rgba(29,31,34,.55)}
+.modal{border-radius:12px;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+.modal-h{border-bottom:none;padding:24px 28px 8px}
+.modal-h h2{font-size:20px}
+.modal-b{padding:12px 28px 20px;color:var(--ds-n-800)}
+.modal-f{border-top:none;padding:8px 28px 28px}
+.modal .x{font-size:26px;color:var(--ds-s-500)}
+.modal.pop{max-width:540px;text-align:center}
+.modal.pop .modal-h{display:flex;flex-direction:column;align-items:center;gap:10px;padding:36px 32px 4px;position:relative}
+.modal.pop .modal-h .x{position:absolute;top:16px;right:18px}
+.modal.pop .pop-ico{width:64px;height:64px;border-radius:50%;background:var(--ds-s-100);color:var(--ds-s-600);display:grid;place-items:center;font-size:28px}
+.modal.pop .pop-sub{margin:0;font-size:14px;color:var(--ds-n-800);max-width:420px}
+.modal.pop .modal-b{text-align:left;padding:16px 32px 8px}
+.modal.pop .modal-f{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:16px;padding:16px 32px 32px}
+.modal.pop .modal-f .btn{width:100%}
+
+/* ---------- Success (green tick with soft ring) ---------- */
+.success .tick{background:var(--ds-pos-500);box-shadow:0 0 0 10px var(--ds-pos-100);margin-bottom:22px}
+.success.rejected .tick{background:var(--ds-err-500);box-shadow:0 0 0 10px var(--ds-err-100)}
+.success h1{font-size:24px}
+
+/* ---------- Tables, tabs, stepper, timeline ---------- */
+th{background:var(--ds-n-200);color:var(--ds-s-500);font-weight:600}
+td{color:var(--ds-s-500)}
+.tbl-wrap{border-color:var(--ds-n-300);border-radius:12px}
+.tabs button.on{color:var(--ds-s-500);border-bottom-color:var(--ds-p-500)}
+.stepper button{border-color:var(--ds-n-300);color:var(--ds-n-800);border-radius:8px}
+.stepper button.cur{border-color:var(--ds-s-500);color:var(--ds-s-500);background:var(--ds-s-100)}
+.stepper button.cur .n{background:var(--ds-s-500);color:#fff}
+.stepper button.done .n{background:var(--ds-pos-500)}
+.progress{background:var(--ds-n-300)}
+.progress>div{background:var(--ds-p-500)}
+.timeline li::before{border-color:var(--ds-s-500)}
+.timeline li.done::before{background:var(--ds-pos-500);border-color:var(--ds-pos-500)}
+.toast{background:var(--ds-s-500);color:#fff;border-radius:8px}
+
+/* ---------- Choice cards / declarations ---------- */
+.opt.on,.comm.on{border-color:var(--ds-s-500);background:var(--ds-s-100)}
+.opt.on .opt-dot{border-color:var(--ds-s-500);background:var(--ds-s-500)}
+.decl.on{border-color:var(--ds-pos-500);background:var(--ds-pos-100)}
+
+/* ---------- Header + landing hero ---------- */
+.top{background:#fff;border-bottom:1px solid var(--ds-n-300)}
+.hero{background:var(--ds-s-500)}
+.hero h1{color:#fff;font-weight:700}
+.hero .btn.primary{background:var(--ds-p-500);border-color:var(--ds-p-500);color:var(--ds-s-500)}
+.hero .btn.primary:hover{background:var(--ds-p-400)}
+
+/* ---------- Review & submit: section cards with Edit links ---------- */
+.rv-card{border:1px solid var(--ds-n-300);border-radius:12px;padding:20px 24px;background:#fff}
+.rv-card + .rv-card{margin-top:16px}
+.rv-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.rv-h h3{font-size:18px}
+.rv-edit{border:none;background:none;color:var(--ds-link);font-weight:600;font-size:14px;cursor:pointer;padding:0}
+.rv-edit:hover{text-decoration:underline}
+.rv-pending{font-size:12px;color:var(--ds-warn-700);font-weight:500}
+
+/* ---------- Agent portal + approver panel accents ---------- */
+.ap-nav.on,.drawer-item.on{background:var(--ds-s-100);color:var(--ds-s-500)}
+.ap-link{color:var(--ds-link);font-weight:500}
+.ap-table th{background:#fff;color:var(--ds-s-500)}
+.ap-table td{background:var(--ds-n-100)}
+.qc-tab.on{border-color:var(--ds-s-500);background:var(--ds-s-100)}
+.qc-tab.on .qc-tab-l{color:var(--ds-s-500)}
+.qc-tab.ok .qc-tab-n{color:var(--ds-pos-600)}
+.qc-tab.warn .qc-tab-n{color:var(--ds-warn-700)}
+.qc-tab.err .qc-tab-n{color:var(--ds-err-500)}
+.qc-tab.info .qc-tab-n{color:var(--ds-s-600)}
+.ap-pill.err{background:var(--ds-err-100);color:var(--ds-err-600)}
+.ap-pill.warn{background:var(--ds-warn-100);color:var(--ds-warn-700)}
+.ap-pill.info{background:var(--ds-s-100);color:var(--ds-s-600)}
+.ap-pill.ok{background:var(--ds-pos-100);color:var(--ds-pos-700)}
+.qc-actions{background:#fff}
+.pan-card{background:var(--ds-pos-100);border-color:var(--ds-pos-500)}
+
+/* ---------- Dark mode: keep the DS accents readable on dark surfaces ---------- */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .card,:root:not([data-theme="light"]) .rv-card{background:var(--surface)}
+  :root:not([data-theme="light"]) input,:root:not([data-theme="light"]) select,:root:not([data-theme="light"]) textarea{background:var(--surface-2);color:var(--text);border-color:var(--border)}
+  :root:not([data-theme="light"]) .btn:not(.primary):not(.danger):not(.link){background:var(--surface-2);color:var(--text)}
+  :root:not([data-theme="light"]) .top,:root:not([data-theme="light"]) .qc-actions{background:var(--surface)}
+  :root:not([data-theme="light"]) .kv dd,:root:not([data-theme="light"]) td,:root:not([data-theme="light"]) th{color:var(--text)}
+}
+:root[data-theme="dark"] .card,:root[data-theme="dark"] .rv-card{background:var(--surface)}
+:root[data-theme="dark"] input,:root[data-theme="dark"] select,:root[data-theme="dark"] textarea{background:var(--surface-2);color:var(--text);border-color:var(--border)}
+:root[data-theme="dark"] .btn:not(.primary):not(.danger):not(.link){background:var(--surface-2);color:var(--text)}
+:root[data-theme="dark"] .top,:root[data-theme="dark"] .qc-actions{background:var(--surface)}
+:root[data-theme="dark"] .kv dd,:root[data-theme="dark"] td,:root[data-theme="dark"] th{color:var(--text)}
+/* Poppins is wider than the previous face: give the leads table room so nothing truncates */
+.ap-leads{min-width:1360px}
+.ap-leads th,.ap-leads td{padding:16px 18px}
+.ap-search{min-width:260px}
+.ap-leads .w-date{width:11%}.ap-leads .w-name{width:13%}.ap-leads .w-prod{width:18%}.ap-leads .w-status{width:11%}.ap-leads .w-amt{width:13.5%}.ap-leads .w-mob{width:12.5%}.ap-leads .w-pan{width:11%}.ap-leads .w-act{width:10%}
