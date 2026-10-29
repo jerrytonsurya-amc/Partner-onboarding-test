@@ -37,16 +37,16 @@
     return {
       v: 1,
       apps: [
-        sample({ id: 'S1', ref: 'LAMF-APP-204511', name: 'Meera Krishnan', mobile: '9840011223', email: 'meera.k@example.com', entity: 'Individual', dob: '1988-03-14', pan: 'BKMPK2231F', gender: 'Female', a4: '4821', addr: A.chennai, at: '2026-10-20T10:15:00', bank: { acc: 'XXXXXXXX4521', ifsc: 'HDFC0001234', bank: 'HDFC Bank', branch: 'T Nagar' } }),
-        sample({ id: 'S2', ref: 'LAMF-APP-204498', name: 'Arjun Mehta', mobile: '9820033445', email: 'arjun.mehta@example.com', entity: 'Proprietor', dob: '1984-11-02', pan: 'CDMPM7781K', a4: '3390', addr: A.mum, at: '2026-10-20T09:02:00', gstin: '27CDMPM7781K1Z2', bank: { mode: 'manual', method: 'Penny drop ₹1', acc: 'XXXXXXXX7710', ifsc: 'ICIC0002211', bank: 'ICICI Bank', branch: 'Andheri West', type: 'Current' }, docs: { udyam: { name: 'udyam_certificate.pdf', size: 182344 } } }),
-        sample({ id: 'S3', ref: 'LAMF-APP-204476', name: 'Kaveri Wealth Partners', mobile: '9445045678', email: 'kaveri.wp@example.com', entity: 'Partnership', dob: '2016-04-01', pan: 'AAKFK5521L', aadhaarName: 'Rahul Sharma', aadhaarDob: '1979-06-21', a4: '2045', addr: A.cbe, at: '2026-10-19T17:40:00', gstin: '33AAKFK5521L1Z8', bankName: 'K Karthikeyan', bankMatch: 40, bank: { mode: 'manual', method: 'Penny drop ₹1 + cancelled cheque', acc: 'XXXXXXXX0000', ifsc: 'CNRB0001122', bank: 'Canara Bank', branch: 'Gopalapuram', type: 'Current', cheque: { name: 'cancelled_cheque.jpg', size: 204811 } }, docs: { deed: { name: 'partnership_deed.pdf', size: 402211 } } }),
-        sample({ id: 'S4', ref: 'LAMF-APP-204460', name: 'Nimbus Finserv Pvt Ltd', mobile: '9000011122', email: 'ops@nimbusfinserv.example', entity: 'Company', dob: '2018-07-01', pan: 'AAHCN4410Q', aadhaarName: 'Vikram Rao', aadhaarDob: '1975-02-09', a4: '5501', addr: A.blr, at: '2026-10-19T12:20:00', gstin: '29AAHCN4410Q1Z4', bank: { mode: 'manual', method: 'Penny drop ₹1', acc: 'XXXXXXXX1199', ifsc: 'UTIB0000987', bank: 'Axis Bank', branch: 'Indiranagar', type: 'Current' }, docs: { coi: { name: 'certificate_of_incorporation.pdf', size: 120440 } } }),
-        sample({ id: 'S5', ref: 'LAMF-APP-204431', name: 'Priya Venkatesh', mobile: '9600034567', email: 'priya.v@example.com', entity: 'Individual', dob: '1991-08-09', pan: 'DEFPV2468M', gender: 'Female', a4: '6612', addr: A.cbe, at: '2026-10-18T15:05:00', bank: { acc: 'XXXXXXXX3307', ifsc: 'HDFC0001234', bank: 'HDFC Bank', branch: 'Main Branch' },
+        sample({ id: 'S1', ref: 'SCL-LD-20261020-000001', name: 'Meera Krishnan', mobile: '9840011223', email: 'meera.k@example.com', entity: 'Individual', dob: '1988-03-14', pan: 'BKMPK2231F', gender: 'Female', a4: '4821', addr: A.chennai, at: '2026-10-20T10:15:00', bank: { acc: 'XXXXXXXX4521', ifsc: 'HDFC0001234', bank: 'HDFC Bank', branch: 'T Nagar' } }),
+        sample({ id: 'S2', ref: 'SCL-LD-20261020-000002', name: 'Arjun Mehta', mobile: '9820033445', email: 'arjun.mehta@example.com', entity: 'Proprietor', dob: '1984-11-02', pan: 'CDMPM7781K', a4: '3390', addr: A.mum, at: '2026-10-20T09:02:00', gstin: '27CDMPM7781K1Z2', bank: { mode: 'manual', method: 'Penny drop ₹1', acc: 'XXXXXXXX7710', ifsc: 'ICIC0002211', bank: 'ICICI Bank', branch: 'Andheri West', type: 'Current' }, docs: { udyam: { name: 'udyam_certificate.pdf', size: 182344 } } }),
+        sample({ id: 'S3', ref: 'SCL-LD-20261019-000001', name: 'Kaveri Wealth Partners', mobile: '9445045678', email: 'kaveri.wp@example.com', entity: 'Partnership', dob: '2016-04-01', pan: 'AAKFK5521L', aadhaarName: 'Rahul Sharma', aadhaarDob: '1979-06-21', a4: '2045', addr: A.cbe, at: '2026-10-19T17:40:00', gstin: '33AAKFK5521L1Z8', bankName: 'K Karthikeyan', bankMatch: 40, bank: { mode: 'manual', method: 'Penny drop ₹1 + cancelled cheque', acc: 'XXXXXXXX0000', ifsc: 'CNRB0001122', bank: 'Canara Bank', branch: 'Gopalapuram', type: 'Current', cheque: { name: 'cancelled_cheque.jpg', size: 204811 } }, docs: { deed: { name: 'partnership_deed.pdf', size: 402211 } } }),
+        sample({ id: 'S4', ref: 'SCL-LD-20261019-000002', name: 'Nimbus Finserv Pvt Ltd', mobile: '9000011122', email: 'ops@nimbusfinserv.example', entity: 'Company', dob: '2018-07-01', pan: 'AAHCN4410Q', aadhaarName: 'Vikram Rao', aadhaarDob: '1975-02-09', a4: '5501', addr: A.blr, at: '2026-10-19T12:20:00', gstin: '29AAHCN4410Q1Z4', bank: { mode: 'manual', method: 'Penny drop ₹1', acc: 'XXXXXXXX1199', ifsc: 'UTIB0000987', bank: 'Axis Bank', branch: 'Indiranagar', type: 'Current' }, docs: { coi: { name: 'certificate_of_incorporation.pdf', size: 120440 } } }),
+        sample({ id: 'S5', ref: 'SCL-LD-20261018-000001', name: 'Priya Venkatesh', mobile: '9600034567', email: 'priya.v@example.com', entity: 'Individual', dob: '1991-08-09', pan: 'DEFPV2468M', gender: 'Female', a4: '6612', addr: A.cbe, at: '2026-10-18T15:05:00', bank: { acc: 'XXXXXXXX3307', ifsc: 'HDFC0001234', bank: 'HDFC Bank', branch: 'Main Branch' },
           status: 'Approved', qc: { decision: 'Approved', by: APPROVER, at: d('2026-10-19T11:30:00'), eAgreement: { sentAt: d('2026-10-19T11:30:00') }, commercials: { interest: [{ from: 9, to: 10, then: 0.5 }, { from: 10, to: 12, then: 0.75 }], procFee: [{ op: '<', amount: 500000, share: 300 }, { op: '>=', amount: 500000, share: 500 }] } },
-          agreement: { signedAt: d('2026-10-19T15:05:00'), docId: 'ESG48210377', agentCode: 'LAMF-AG1101' } }),
-        sample({ id: 'S6', ref: 'LAMF-APP-204417', name: 'Suresh Kumar', mobile: '9884055566', email: 'suresh.kumar@example.com', entity: 'Individual', dob: '1986-12-30', pan: 'FGHPK9753P', a4: '7756', addr: A.hyd, at: '2026-10-18T10:45:00', bank: { mode: 'manual', method: 'Penny drop ₹1', acc: 'XXXXXXXX6620', ifsc: 'KKBK0007788', bank: 'Kotak Mahindra Bank', branch: 'Jubilee Hills' },
+          agreement: { signedAt: d('2026-10-19T15:05:00'), docId: 'ESG48210377', agentCode: 'SCL-AG-000001' } }),
+        sample({ id: 'S6', ref: 'SCL-LD-20261018-000002', name: 'Suresh Kumar', mobile: '9884055566', email: 'suresh.kumar@example.com', entity: 'Individual', dob: '1986-12-30', pan: 'FGHPK9753P', a4: '7756', addr: A.hyd, at: '2026-10-18T10:45:00', bank: { mode: 'manual', method: 'Penny drop ₹1', acc: 'XXXXXXXX6620', ifsc: 'KKBK0007788', bank: 'Kotak Mahindra Bank', branch: 'Jubilee Hills' },
           status: 'Approved', qc: { decision: 'Approved', by: APPROVER, at: d('2026-10-18T16:10:00'), eAgreement: { sentAt: d('2026-10-18T16:10:00') }, commercials: { interest: null, procFee: [{ op: '>=', amount: 100000, share: 250 }] } } }),
-        sample({ id: 'S7', ref: 'LAMF-APP-204402', name: 'Ganesh & Co', mobile: '9176056789', email: 'ganesh.co@example.com', entity: 'Partnership', dob: '2012-01-15', pan: 'AAGFG3301H', aadhaarName: 'Suresh Kumar', aadhaarDob: '1970-05-05', a4: '1187', addr: A.chennai, at: '2026-10-17T14:00:00', bank: { acc: 'XXXXXXXX9033', ifsc: 'SBIN0004455', bank: 'State Bank of India', branch: 'T Nagar' }, docs: { deed: { name: 'deed_scan_partial.pdf', size: 88000 } },
+        sample({ id: 'S7', ref: 'SCL-LD-20261017-000001', name: 'Ganesh & Co', mobile: '9176056789', email: 'ganesh.co@example.com', entity: 'Partnership', dob: '2012-01-15', pan: 'AAGFG3301H', aadhaarName: 'Suresh Kumar', aadhaarDob: '1970-05-05', a4: '1187', addr: A.chennai, at: '2026-10-17T14:00:00', bank: { acc: 'XXXXXXXX9033', ifsc: 'SBIN0004455', bank: 'State Bank of India', branch: 'T Nagar' }, docs: { deed: { name: 'deed_scan_partial.pdf', size: 88000 } },
           status: 'Rejected', qc: { decision: 'Rejected', by: APPROVER, at: d('2026-10-18T12:00:00'), reason: 'Incomplete or invalid documents', remarks: 'Partnership deed is missing pages 3–5 (partner signatures).' } }),
       ],
     };
@@ -136,7 +136,10 @@
   const StatusBadge = ({ x }) => html`<${Badge} tone=${TONE[statusOf(x)]}>${statusOf(x)}<//>`;
   const person = (x) => x.entity === 'Individual' || x.entity === 'Proprietor';
   const entityLabel = (x) => (person(x) ? 'Individual / Proprietor' : x.entity);
-  const professionLabel = (x) => (x.profession === 'Others' && x.professionDetail ? 'Others — ' + x.professionDetail : (x.profession || ''));
+  const professionLabel = (x) => {
+    const base = x.profession === 'Others' && x.professionDetail ? 'Others — ' + x.professionDetail : (x.profession || '');
+    return x.arn ? base + ' · ARN ' + x.arn : base;
+  };
 
   /* ======================= LIST ======================= */
   function QcList({ onOpen }) {
@@ -203,25 +206,26 @@
     ['gst', 'GST & entity documents verified', 'GSTIN and uploaded entity documents'],
   ];
   const PAYOUTS = [0.3, 0.5];
-  function SendAgreement({ onClose, onSend }) {
+  function SendAgreement({ x, onClose, onSend }) {
+    const checks = VERIFY_CHECKS.filter(([key]) => key !== 'kyc' || x.entity === 'Individual' || x.entity === 'Proprietor');
     const [ticks, setTicks] = useState({});
     const [rate, setRate] = useState(null);
-    const done = VERIFY_CHECKS.filter(([key]) => ticks[key]).length;
-    const ready = done === VERIFY_CHECKS.length;
+    const done = checks.filter(([key]) => ticks[key]).length;
+    const ready = done === checks.length;
     const valid = ready && PAYOUTS.indexOf(rate) >= 0;
     const toggle = (key) => {
       const next = Object.assign({}, ticks, { [key]: !ticks[key] });
       setTicks(next);
-      if (VERIFY_CHECKS.some(([id]) => !next[id])) setRate(null);
+      if (checks.some(([id]) => !next[id])) setRate(null);
     };
-    return html`<${Modal} title="Approve & send e-agreement" onClose=${onClose} footer=${html`<${Btn} onClick=${onClose}>Cancel<//><${Btn} kind="primary" disabled=${!valid} onClick=${() => onSend({ payout: rate })}>Approve & send<//>`}>
+    return html`<${Modal} title="Approve & send e-agreement" onClose=${onClose} footer=${html`<${Btn} onClick=${onClose}>Cancel<//><${Btn} kind="primary" disabled=${!valid} onClick=${() => onSend({ payout: rate, checks: checks.map(([key]) => key) })}>Approve & send<//>`}>
       <div class="verify-pop stack">
         <div>
           <h3>Verify the application</h3>
-          <p class="verify-lead">Tick each section once you have checked it. ${done} of ${VERIFY_CHECKS.length} verified.</p>
+          <p class="verify-lead">Tick each section once you have checked it. ${done} of ${checks.length} verified.</p>
         </div>
         <div class="verify-rows">
-          ${VERIFY_CHECKS.map(([key, title, sub]) => html`<label key=${key} class="verify-row">
+          ${checks.map(([key, title, sub]) => html`<label key=${key} class="verify-row">
             <input type="checkbox" checked=${!!ticks[key]} onChange=${() => toggle(key)} />
             <span><b>${title}</b><span class="small">${sub}</span></span>
           </label>`)}
@@ -234,12 +238,13 @@
               <b>${p}%</b><span>of the disbursed loan amount</span>
             </button>`)}
           </div>
+          ${rate != null && html`<${Note} tone="info"><b>Selected commercials</b><div>Partner commission of ${rate}% of the disbursed loan amount.</div><//>`}
         </div>
       </div><//>`;
   }
 
   /* ======================= REVIEW ======================= */
-  const DOCS_FOR = { Individual: [], Proprietor: [['udyam', 'Udyam / Shop & Establishment certificate']], Partnership: [['deed', 'Partnership deed']], Company: [['coi', 'Certificate of Incorporation (COI)']] };
+  const DOCS_FOR = { Individual: [], Proprietor: [], Partnership: [['deed', 'Partnership deed']], Company: [['coi', 'Certificate of Incorporation (COI)']] };
   function Review({ id, live, onBack }) {
     useStore();
     const x = allApps().find((y) => y.id === id);
@@ -250,13 +255,14 @@
     const k = x.kyc, ad = k.aadhaar || {}, addr = ad.address || {}, bank = k.bank || {}, gst = k.gst || {};
     const pending = statusOf(x) === 'Pending';
     const viewBtn = (title, f) => html`<span class="doc-row"><span class="doc-name">📎 ${f.name}</span><${Btn} sm onClick=${() => setModal({ doc: { title, file: f } })}>View<//></span>`;
-    const docRows = (DOCS_FOR[x.entity] || []).map(([key, label]) => [label, k.docs && k.docs[key] ? viewBtn(label, k.docs[key]) : '']);
+    const firm = x.entity === 'Partnership' || x.entity === 'Company';
+    const docRows = (DOCS_FOR[x.entity] || []).map(([key, label]) => [label, k.docs && k.docs[key] ? viewBtn(label, k.docs[key]) : '—']);
     const match = Number(bank.nameMatch) || 0;
     return html`<div class=${'content-narrow' + (pending ? ' has-actions' : '')}>
       <div class="mb"><${Btn} kind="link" onClick=${onBack}>← Approvals<//></div>
       <${UI.SummaryStrip} icon="user" title=${x.name} sub=${x.ref + ' · ' + entityLabel(x) + ' · PAN ' + x.pan}
         tag=${{ text: statusOf(x), tone: { Pending: 'warn', Approved: 'info', [SIGNED]: 'ok', Rejected: 'err' }[statusOf(x)] }}
-        lines=${[['phone', '+91 ' + x.mobile], ['mail', x.email]]}
+        lines=${[['phone', '+91 ' + x.mobile], ['mail', html`<span class="one-line">${x.email}</span>`]]}
         figLabel="Name match with PAN" fig=${match + '%'} figSub=${bank.bank ? 'Bank: ' + bank.bank : ''}
         boxLabel="Submitted" box=${fd(x.submittedAt)} boxSub=${new Date(x.submittedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })} />
       ${x.qc && html`<div class="mb"><${Note} tone=${x.qc.decision === 'Approved' ? 'ok' : 'err'}>
@@ -266,16 +272,16 @@
       <//></div>`}
       <div class="stack">
         <div class="grid g2">
-          <${Card} title="Applicant"><${KV} items=${[['Reference', x.ref], ['Entity type', entityLabel(x)], ['Profession', professionLabel(x)], [person(x) ? 'Name' : 'Entity name', x.name], [person(x) ? 'Date of birth' : 'Date of incorporation', fd(x.dob)], ['Mobile', html`${x.mobile} <span class="ok-t"><${UI.Tick} size="16" label="Verified" /></span>`], ['Email', html`${x.email} <span class="ok-t"><${UI.Tick} size="16" label="Verified" /></span>`]]} /><//>
+          <${Card} title="Applicant"><${KV} items=${[['Reference', x.ref], ['Entity type', entityLabel(x)], ['Profession', professionLabel(x)], [person(x) ? 'Name' : 'Entity name', x.name], [person(x) ? 'Date of birth' : 'Date of incorporation', fd(x.dob)], ['Mobile', html`${x.mobile} <span class="ok-t"><${UI.Tick} size="16" label="Verified" /></span>`], ['Email', html`<span class="one-line">${x.email}</span> <span class="ok-t"><${UI.Tick} size="16" label="Verified" /></span>`]]} /><//>
           <${Card} title="PAN"><${KV} items=${[['PAN', html`<span class="mono">${x.pan}</span>`], ['Name as per PAN', k.pan.name], [person(x) ? 'DOB as per PAN' : 'Incorporation as per PAN', fd(k.pan.dob)], ['Holder type', k.pan.type]]} /><//>
         </div>
-        ${x.entity === 'Company' && !ad.ok ? html`<${Note}>KYC verification is not required for a company.<//>` : html`<${Card} title=${'KYC information' + (ad.signatory ? ' · authorised signatory' : '')}>
+        ${firm ? html`<${Card} title="KYC information"><p class="muted" style="margin:0">Not applicable</p><//>` : html`<${Card} title=${'KYC information' + (ad.signatory ? ' · authorised signatory' : '')}>
           <div class="kyc-grid">
             <figure class="kyc-photo"><${UI.IdPhoto} src=${ad.photo} name=${ad.name} /><figcaption class="small muted">Photo from Aadhaar</figcaption></figure>
             <${KV} items=${[['Name', ad.name], ['Date of birth', fd(ad.dob)], ['Gender', ad.gender], ['Aadhaar', html`<span class="mono">${ad.masked}</span>`], ['Fetched on', fdt(ad.at)]]} />
           </div>
         <//>`}
-        ${x.entity === 'Company' && !ad.ok ? '' : html`<${Card} title="Address as per Aadhaar"><${KV} items=${[['House / Flat no.', addr.house], ['Street / Locality', addr.street], ['Landmark', addr.landmark], ['City / Town', addr.city], ['District', addr.district], ['State', addr.state], ['PIN code', addr.pin], ['Country', addr.country]]} /><//>`}
+        ${firm ? '' : html`<${Card} title="Address as per Aadhaar"><${KV} items=${[['House / Flat no.', addr.house], ['Street / Locality', addr.street], ['Landmark', addr.landmark], ['City / Town', addr.city], ['District', addr.district], ['State', addr.state], ['PIN code', addr.pin], ['Country', addr.country]]} /><//>`}
         <${Card} title="Bank account"><${KV} items=${[['Account', html`<span class="mono">${bank.acc}</span> · ${bank.type || 'Savings'}`], ['Bank / IFSC', bank.bank + ' · ' + bank.ifsc], ['Name as per bank', bank.beneficiary],
             ['Name match with PAN', html`<span class=${match >= 70 ? 'ok-t' : 'err-t'}>${match}%</span>`], ['Cancelled cheque', bank.cheque ? viewBtn('Cancelled cheque', bank.cheque) : '']]} /><//>
         <${Card} title="GST & entity documents"><${KV} items=${[['GSTIN', gst.gstin ? html`<span class="mono">${gst.gstin}</span>` : ''], ['Legal name', gst.gstin ? gst.legalName : ''], ['GST status', gst.gstin ? gst.status : ''], ...docRows]} /><//>
@@ -285,7 +291,7 @@
         <${Btn} kind="primary" onClick=${() => setModal('agree')}>Approve & send e-agreement<//>
       </div>`}
       ${modal && modal.doc && html`<${DocViewer} title=${modal.doc.title} file=${modal.doc.file} x=${x} onClose=${() => setModal(null)} />`}
-      ${modal === 'agree' && html`<${SendAgreement} x=${x} onClose=${() => setModal(null)} onSend=${(commercials) => { decide(x, { decision: 'Approved', by: APPROVER, at: nowISO(), eAgreement: { sentAt: nowISO(), to: [x.email, x.mobile] }, commercials }); setModal(null); }} />`}
+      ${modal === 'agree' && html`<${SendAgreement} x=${x} onClose=${() => setModal(null)} onSend=${(picked) => { decide(x, { decision: 'Approved', by: APPROVER, at: nowISO(), eAgreement: { sentAt: nowISO(), to: [x.email, x.mobile] }, checks: picked.checks, commercials: { payout: picked.payout } }); setModal(null); }} />`}
       ${modal === 'reject' && html`<${Modal} title=${'Reject ' + x.name} onClose=${() => setModal(null)} footer=${html`<${Btn} onClick=${() => setModal(null)}>Cancel<//><${Btn} kind="danger" disabled=${reason === 'Other' && !rejRemarks.trim()} onClick=${() => { decide(x, { decision: 'Rejected', by: APPROVER, at: nowISO(), reason, remarks: rejRemarks.trim() }); setModal(null); }}>Reject application<//>`}>
         <div class="stack">
           <${Select} label="Reason" value=${reason} onChange=${setReason} options=${REJECT_REASONS} />

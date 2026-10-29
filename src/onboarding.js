@@ -96,7 +96,7 @@
   const updApp = (fn) => update((s) => fn(s.app, s));
   const stepDone = (idx, fn) => updApp((a, s) => { fn(a, s); a.step = Math.max(a.step || 0, idx + 1); });
 
-  const { html, useState, useEffect, useStore, fdt, fd, sleep, otp } = UI;
+  const { html, useState, useEffect, useRef, useStore, fdt, fd, sleep, otp } = UI;
   const { Badge, Btn, Card, Input, KV, Note, FileIn } = UI;
   const PAN_RE = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
   const IFSC_RE = /^[A-Z]{4}0[A-Z0-9]{6}$/;
@@ -128,7 +128,7 @@
           <h1>Become a Loan Against Mutual Funds <span class="accent">partner</span></h1>
           <p>Help your clients get funds without selling their investments, and earn commission on every disbursed loan.</p>
           <div class="row"><${Btn} kind="primary" onClick=${() => setStarting(true)}>Start application →<//></div>
-          <p class="small" style="opacity:.85">Takes about 5 minutes · 100% digital · no paperwork</p>
+          <p class="small" style="opacity:.85">Takes about 10 minutes · 100% digital · no paperwork</p>
         </div>
       </section>
       <div class="content-narrow">
@@ -148,15 +148,119 @@
     </div>`;
   }
 
+  /* OTP: valid for 120 seconds, resend after 30 seconds, 3 wrong attempts then a 15-minute lock.
+     SMS is sent and checked by the server. Email still uses the on-screen prototype code. */
+  function OtpChallenge({ destination, onVerified, channel, purpose }) {
+    const sms = (channel || 'SMS') === 'SMS';
+    const [sentAt, setSentAt] = useState(0);
+    const [attempts, setAttempts] = useState(0);
+    const [lockUntil, setLockUntil] = useState(0);
+    const [now, setNow] = useState(() => Date.now());
+    const [ent, setEnt] = useState('');
+    const [err, setErr] = useState('');
+    const [sendErr, setSendErr] = useState('');
+    const [fallback, setFallback] = useState(false);
+    const [busy, setBusy] = useState(true);
+    const [ready, setReady] = useState(false);
+    const started = useRef(false);
+    useEffect(() => { const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, []);
+    const locked = now < lockUntil;
+    const age = sentAt ? Math.floor((now - sentAt) / 1000) : 0;
+    const expired = ready && age >= 120;
+    const resendIn = Math.max(0, 30 - age);
+    const lockMins = Math.max(1, Math.ceil((lockUntil - now) / 60000));
+    async function send() {
+      if (locked || busy && ready) return;
+      setBusy(true); setErr(''); setSendErr('');
+      try {
+        if (sms && window.LamfPersist && await LamfPersist.ping()) {
+          const data = await LamfPersist.post('/api/otp/send', { mobile: destination, purpose: purpose || 'onboarding' });
+          const expiresIn = Number(data.expiresIn) || 120;
+          setSentAt(Date.now() - (120 - expiresIn) * 1000);
+          setFallback(false);
+          setSendErr('');
+        } else setSentAt(Date.now());
+        setAttempts(0); setEnt(''); setReady(true);
+        toast('OTP sent to ' + destination, channel || 'SMS');
+      } catch (e) {
+        setFallback(true);
+        setSendErr(e.message || 'Could not send the OTP.');
+        setSentAt(Date.now());
+        setAttempts(0); setEnt(''); setReady(true);
+        toast('Enter 000000 to continue', channel || 'SMS');
+      } finally { setBusy(false); }
+    }
+    useEffect(() => { if (started.current) return; started.current = true; send(); }, []);
+    async function verify() {
+      if (locked) return setErr('Too many incorrect attempts. Try again in ' + lockMins + ' minutes.');
+      if (!sentAt || expired) return setErr('This OTP has expired. Resend a new one.');
+      setBusy(true);
+      try {
+        if (fallback) {
+          if (ent === otp()) return onVerified();
+        } else if (sms && window.LamfPersist && await LamfPersist.ping()) {
+          await LamfPersist.post('/api/otp/verify', { mobile: destination, purpose: purpose || 'onboarding', otp: ent });
+          onVerified();
+          return;
+        } else if (ent === otp()) return onVerified();
+        const next = attempts + 1;
+        setAttempts(next);
+        if (next >= 3) { setLockUntil(Date.now() + 15 * 60 * 1000); return setErr('Too many incorrect attempts. Try again in 15 minutes.'); }
+        setErr('Incorrect OTP. ' + (3 - next) + (3 - next === 1 ? ' attempt' : ' attempts') + ' left.');
+      } catch (e) {
+        const message = e.message || 'Incorrect OTP';
+        if (message.indexOf('Too many incorrect attempts') === 0) setLockUntil(Date.now() + 15 * 60 * 1000);
+        setErr(message);
+      } finally { setBusy(false); }
+    }
+    return html`<div class="stack">
+      ${!ready && html`<${Note} tone="info">Sending OTP to ${destination}…<//>`}
+      ${ready && fallback && html`<${Note} tone="warn">${sendErr} Enter 000000 to continue.<//>`}
+      ${ready && !fallback && html`<${Note} tone="info">OTP sent to ${destination}. It is valid for 120 seconds.<//>`}
+      ${locked && html`<${Note} tone="err">Too many incorrect attempts. Try again in ${lockMins} minutes.<//>`}
+      ${ready && !locked && html`<${UI.OtpBoxes} value=${ent} onChange=${(v) => { setEnt(v); setErr(''); }} err=${err} autoFocus />
+        <div class="row">
+          <${Btn} kind="primary" disabled=${busy || ent.length !== 6 || expired} onClick=${verify}>Verify<//>
+          <${Btn} kind="link" disabled=${busy || resendIn > 0} onClick=${send}>${resendIn > 0 ? 'Resend in ' + resendIn + 's' : 'Resend'}<//>
+        </div>`}
+      ${expired && !locked && html`<${Note} tone="warn">This OTP has expired. Resend a new one.<//>`}
+    </div>`;
+  }
+
+  function activePartner(mobile) {
+    return (Store.get().activePartners || []).find((p) => p.mobile === mobile);
+  }
+  function nextRef() {
+    const day = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const prefix = 'SCL-LD-' + day + '-';
+    let n = 0;
+    Object.values(Store.get().journeys || {}).forEach((j) => {
+      if (j.ref && j.ref.indexOf(prefix) === 0) n = Math.max(n, parseInt(j.ref.slice(prefix.length), 10) || 0);
+    });
+    return prefix + String(n + 1).padStart(6, '0');
+  }
+  function nextAgentCode() {
+    let n = 0;
+    const seen = (code) => { const m = /^SCL-AG-(\d+)$/.exec(code || ''); if (m) n = Math.max(n, parseInt(m[1], 10)); };
+    Object.values(Store.get().journeys || {}).forEach((j) => j.agreement && seen(j.agreement.agentCode));
+    (Store.get().activePartners || []).forEach((p) => seen(p.agentCode));
+    return 'SCL-AG-' + String(n + 1).padStart(6, '0');
+  }
+  function maskAccount(acc) {
+    const digits = String(acc || '').replace(/\D/g, '');
+    if (!digits) return acc || '';
+    return 'X'.repeat(Math.max(0, digits.length - 4)) + digits.slice(-4);
+  }
+
   /* Mobile + OTP. An existing journey for this mobile is resumed; otherwise a new one starts with the mobile verified. */
   function StartModal({ onClose }) {
     const [mobile, setMobile] = useState('');
     const [sent, setSent] = useState(false);
-    const [ent, setEnt] = useState('');
-    const [err, setErr] = useState('');
+    const [blocked, setBlocked] = useState('');
     const valid = /^[6-9]\d{9}$/.test(mobile);
-    function verify() {
-      if (ent !== otp()) return setErr('Incorrect OTP');
+    function verified() {
+      const partner = activePartner(mobile);
+      if (partner) return setBlocked('An Agent ID has already been generated for this mobile number. Sign in to the agent portal with your email instead of starting a new application.');
       const existing = Store.get().journeys[mobile];
       update((st) => {
         if (existing) st.app = existing;
@@ -167,14 +271,12 @@
       window.scrollTo(0, 0);
       onClose();
     }
-    return html`<${UI.Modal} title="Start application" icon=${ico(ICONS.phone)} sub="Enter your mobile number. If you've already started an application, we'll take you back to it." onClose=${onClose} footer=${sent
-      ? html`<${Btn} kind="primary" disabled=${ent.length !== 6} onClick=${verify}>Verify & continue<//>`
-      : html`<${Btn} kind="primary" disabled=${!valid} onClick=${() => setSent(true)}>Send OTP<//>`}>
+    return html`<${UI.Modal} title="Start application" icon=${ico(ICONS.phone)} sub="Enter your mobile number. If you've already started an application, we'll take you back to it." onClose=${onClose} footer=${sent ? '' : html`<${Btn} kind="primary" disabled=${!valid} onClick=${() => setSent(true)}>Send OTP<//>`}>
       <div class="stack">
-        <${Input} label="Mobile number" value=${mobile} onChange=${(v) => { setMobile(v.replace(/\D/g, '').slice(0, 10)); setSent(false); setEnt(''); setErr(''); }} inputmode="numeric" placeholder="10-digit mobile"
+        <${Input} label="Mobile number" value=${mobile} onChange=${(v) => { setMobile(v.replace(/\D/g, '').slice(0, 10)); setSent(false); setBlocked(''); }} inputmode="numeric" placeholder="10-digit mobile" autoFocus
           err=${mobile && !valid ? 'Enter a valid 10-digit Indian mobile number' : ''} />
-        ${sent && html`<${Note} tone="info">OTP sent to ${mobile}<//>
-          <${UI.OtpBoxes} value=${ent} onChange=${(v) => { setEnt(v); setErr(''); }} err=${err} autoFocus />`}
+        ${blocked && html`<${Note} tone="err">${blocked}<//>`}
+        ${sent && !blocked && html`<${OtpChallenge} destination=${mobile} onVerified=${verified} />`}
       </div><//>`;
   }
 
@@ -190,18 +292,18 @@
   }
 
   function Wizard({ a }) {
-    const company = a.entity === 'Company';
-    const flow = (company ? STEPS.filter((t) => t !== 'KYC verification') : STEPS).map((t) => ({ t, abs: STEPS.indexOf(t) }));
+    const firm = isFirm(a.entity);
+    const flow = (firm ? STEPS.filter((t) => t !== 'KYC verification') : STEPS).map((t) => ({ t, abs: STEPS.indexOf(t) }));
     const comps = [StepReg, StepPAN, StepKYC, StepBank, StepGST, StepReview];
     const [absI, setAbsI] = useState(() => {
       let start = Math.min(a.step || 0, 5);
-      if (a.entity === 'Company' && start === 2) start = 3;
+      if (isFirm(a.entity) && start === 2) start = 3;
       return start;
     });
     const next = () => {
       setAbsI((x) => {
         let n = x + 1;
-        if (Store.get().app && Store.get().app.entity === 'Company' && n === 2) n = 3;
+        if (Store.get().app && isFirm(Store.get().app.entity) && n === 2) n = 3;
         return Math.min(n, 5);
       });
       window.scrollTo(0, 0);
@@ -209,7 +311,7 @@
     const back = () => {
       setAbsI((x) => {
         let n = x - 1;
-        if (Store.get().app && Store.get().app.entity === 'Company' && n === 2) n = 1;
+        if (Store.get().app && isFirm(Store.get().app.entity) && n === 2) n = 1;
         return Math.max(n, 0);
       });
       window.scrollTo(0, 0);
@@ -230,7 +332,7 @@
             <span class=${'n' + (s.abs < done && s.abs !== absI ? ' n-ok' : '')}>${s.abs < done && s.abs !== absI ? html`<${UI.Tick} size="22" />` : k + 1}</span>${s.t}</button></li>`)}</ol>
         <div class="chev-actions"><${Btn} sm onClick=${() => window.dispatchEvent(new Event('lamf:ask-exit'))}>Save & exit<//></div>
       </div>
-      <div class="card wiz-card"><${Comp} key=${absI} a=${a} next=${next} idx=${absI} goTo=${(k) => { if (Store.get().app && Store.get().app.entity === 'Company' && k === 2) return; setAbsI(k); window.scrollTo(0, 0); }} /></div>
+      <div class="card wiz-card"><${Comp} key=${absI} a=${a} next=${next} idx=${absI} goTo=${(k) => { if (Store.get().app && isFirm(Store.get().app.entity) && k === 2) return; setAbsI(k); window.scrollTo(0, 0); }} /></div>
       ${absI > 0 && html`<div class="mt"><${Btn} kind="link" onClick=${back}>← Previous step<//></div>`}
     </div>`;
   }
@@ -238,9 +340,7 @@
   /* Field + "Send OTP → enter OTP → Verify" flow, shared by mobile and email. */
   function OtpVerify({ label, value, onChange, valid, invalidMsg, ok, setOk, channel, what, inputProps }) {
     const [sent, setSent] = useState(false);
-    const [ent, setEnt] = useState('');
-    const [err, setErr] = useState('');
-    const change = (v) => { onChange(v); setOk(false); setSent(false); setEnt(''); setErr(''); };
+    const change = (v) => { onChange(v); setOk(false); setSent(false); };
     return html`<div class="stack">
       <label class="field"><span>${label}</span>
         <div class=${'verify-box' + (ok ? ' is-ok' : '')}>
@@ -249,13 +349,7 @@
         </div>
         ${value && !valid && html`<div class="errt">${invalidMsg}</div>`}
       </label>
-      ${ok ? null : sent ? html`
-        <${Note} tone="info">OTP sent to ${value}<//>
-        <${UI.OtpBoxes} label=${'Enter ' + what.toLowerCase() + ' OTP'} value=${ent} onChange=${(v) => { setEnt(v); setErr(''); }} autoFocus />
-        <div class="row"><${Btn} kind="primary" disabled=${ent.length !== 6} onClick=${() => (ent === otp() ? setOk(true) : setErr('Incorrect OTP'))}>Verify<//>
-          <${Btn} kind="link" onClick=${() => { setEnt(''); toast('OTP resent to ' + value, channel); }}>Resend<//></div>
-        ${err && html`<${Note} tone="err">${err}<//>`}`
-      : html`<div><${Btn} disabled=${!valid} onClick=${() => setSent(true)}>Send OTP<//></div>`}
+      ${ok ? null : sent ? html`<${OtpChallenge} key=${value} destination=${value} channel=${channel} onVerified=${() => setOk(true)} />` : html`<div><${Btn} disabled=${!valid} onClick=${() => setSent(true)}>Send OTP<//></div>`}
     </div>`;
   }
 
@@ -300,6 +394,7 @@
     const [entity, setEntity] = useState(a.entity === 'Proprietor' ? 'Individual' : (a.entity || 'Individual'));
     const [profession, setProfession] = useState(a.profession || '');
     const [professionOther, setProfessionOther] = useState(a.profession === 'Others' ? (a.professionDetail || '') : '');
+    const [arn, setArn] = useState(a.arn || '');
     const [incorporated, setIncorporated] = useState(isFirm(a.entity) ? (a.dob || '') : '');
     const [pan, setPan] = useState(a.pan || '');
     const [busy, setBusy] = useState(false);
@@ -335,13 +430,16 @@
       setBusy(false);
     }
     const panLabel = entity === 'Partnership' ? 'PAN number of the partnership' : entity === 'Company' ? 'PAN number of the company' : 'PAN number';
+    const needsArn = profession === 'Mutual fund distributor' || profession === 'Mutual fund distribution';
     const specified = profession !== 'Others' || !!professionOther.trim();
-    const canContinue = !!(res && res.ok && profession && specified && (!firm || incorporated));
+    const arnOk = !needsArn || /^ARN\d{3,8}$/.test(arn);
+    const canContinue = !!(res && res.ok && profession && specified && arnOk && (!firm || incorporated));
     return html`<div class="stack">
       <h2>Step 2 · Entity type & PAN</h2>
       <div class="field"><span>Entity type</span><div class="chips">${ENTITIES.map((e) => html`<button key=${e.value} class=${'chip' + ((e.value === 'Individual' ? person : entity === e.value) ? ' on' : '')} onClick=${() => chooseEntity(e.value)}>${e.label}</button>`)}</div></div>
       <div class="field"><span>What best describes your profession?</span><div class="chips">${professions.map((p) => html`<button key=${p} class=${'chip' + (profession === p ? ' on' : '')} onClick=${() => { setProfession(p); if (p !== 'Others') setProfessionOther(''); }}>${p}</button>`)}</div></div>
       ${profession === 'Others' && html`<${Input} label="Please specify your profession" value=${professionOther} onChange=${(v) => setProfessionOther(v.slice(0, 80))} placeholder="e.g. Wealth advisory" />`}
+      ${needsArn && html`<${Input} label="ARN number" value=${arn} onChange=${(v) => setArn(v.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12))} placeholder="ARN12345" err=${arn && !arnOk ? 'Enter the ARN, for example ARN12345' : ''} />`}
       <div class="grid g2">
         <div class="stack">
           <${Input} label=${panLabel} value=${pan} ok=${!!(res && res.ok)} onChange=${(v) => { setPan(v.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10)); setRes(null); }} placeholder="ABCDE1234F"
@@ -356,10 +454,10 @@
       ${busy && html`<${UI.LoaderPop} text="Verifying your PAN…" sub="This takes a few seconds. Please don't close this window." />`}
       <div class="row end"><${Btn} kind="primary" disabled=${!canContinue} onClick=${() => {
         stepDone(idx, (ag) => {
-          ag.entity = entity; ag.profession = profession; ag.professionDetail = profession === 'Others' ? professionOther.trim() : ''; ag.pan = pan;
+          ag.entity = entity; ag.profession = profession; ag.professionDetail = profession === 'Others' ? professionOther.trim() : ''; ag.arn = needsArn ? arn : ''; ag.pan = pan;
           ag.name = res.name.replace(/\b\w+/g, (w) => w[0] + w.slice(1).toLowerCase()).replace(/\bPvt Ltd\b/i, 'Pvt Ltd').replace(/\bLlp\b/, 'LLP');
           ag.dob = firm ? incorporated : res.dob; ag.kyc.pan = res;
-          if (entity === 'Company') ag.step = Math.max(ag.step || 0, 3);
+          if (isFirm(entity)) ag.step = Math.max(ag.step || 0, 3);
           else if (!(ag.kyc.aadhaar && ag.kyc.aadhaar.ok)) ag.step = 2;
         });
         next();
@@ -580,13 +678,13 @@
       ${busy && html`<${UI.LoaderPop} text="Crediting ₹1 to your account…" sub="We're verifying your account and fetching the account holder's name." />`}
       ${mismatch && res && html`<${UI.Modal} title="Name doesn't match" icon=${ico(ICONS.alert)} sub=${'The bank account is in the name of ' + res.beneficiary + ', which doesn\'t match your PAN name ' + panName + '. Please add a bank account held in your own name to continue.'} onClose=${() => setMismatch(false)}
         footer=${html`<${Btn} kind="primary" onClick=${() => setMismatch(false)}>Change bank details<//>`}><//>`}
-      <div class="row end"><${Btn} kind="primary" disabled=${!canSave} onClick=${() => { stepDone(idx, (ag) => { ag.kyc.bank = Object.assign({}, res, { cheque: null }); }); next(); }}>Save & continue →<//></div>
+      <div class="row end"><${Btn} kind="primary" disabled=${!canSave} onClick=${() => { stepDone(idx, (ag) => { ag.kyc.bank = Object.assign({}, res, { acc: maskAccount(res.acc), cheque: null }); }); next(); }}>Save & continue →<//></div>
     </div>`;
   }
 
   const DOCS_BY_ENTITY = {
     Individual: [],
-    Proprietor: [{ k: 'udyam', l: 'Udyam / Shop & Establishment certificate', req: false }],
+    Proprietor: [],
     Partnership: [{ k: 'deed', l: 'Partnership deed', req: true }],
     Company: [{ k: 'coi', l: 'Certificate of Incorporation (COI)', req: true }],
   };
@@ -630,12 +728,12 @@
     const k = a.kyc, ad = k.aadhaar || {}, x = ad.address || {}, bank = k.bank || {}, gst = k.gst || {};
     const person = isPerson(a.entity);
     const entityLabel = person ? 'Individual / Proprietor' : a.entity;
-    const skipKyc = a.entity === 'Company' && !ad.ok;
+    const skipKyc = isFirm(a.entity);
     const docs = Object.entries(k.docs || {}).filter(([, v]) => v);
     const sections = [
       ['Contact details', 0, k.emailOk ? [['Mobile number', a.mobile], ['Email ID', html`<span class="one-line">${a.email}</span>`]] : []],
-      ['Entity & PAN', 1, k.pan.ok ? [['Entity type', entityLabel], ['Profession', a.profession === 'Others' && a.professionDetail ? 'Others — ' + a.professionDetail : (a.profession || '')], [person ? 'Name as per PAN' : 'Entity name as per PAN', k.pan.name], ['PAN', a.pan], ...(isFirm(a.entity) ? [['Date of incorporation', fd(a.dob)]] : [])] : []],
-      ['KYC information', 2, skipKyc ? [['KYC verification', 'Not required for a company']] : ad.ok ? [['Name as per Aadhaar', ad.name], ['Aadhaar', ad.masked], ['Address', [x.house, x.street, x.city, x.state + ' – ' + x.pin].filter(Boolean).join(', ')]] : []],
+      ['Entity & PAN', 1, k.pan.ok ? [['Entity type', entityLabel], ['Profession', a.profession === 'Others' && a.professionDetail ? 'Others — ' + a.professionDetail : (a.profession || '')], ...(a.arn ? [['ARN number', a.arn]] : []), [person ? 'Name as per PAN' : 'Entity name as per PAN', k.pan.name], ['PAN', a.pan], ...(isFirm(a.entity) ? [['Date of incorporation', fd(a.dob)]] : [])] : []],
+      ['KYC information', 2, skipKyc ? [['KYC verification', 'Not applicable']] : ad.ok ? [['Name as per Aadhaar', ad.name], ['Aadhaar', ad.masked], ['Address', [x.house, x.street, x.city, x.state + ' – ' + x.pin].filter(Boolean).join(', ')]] : []],
       ['Bank account', 3, bank.acc ? [['Account', bank.acc + ' · ' + (bank.type || 'Savings')], ['Bank / IFSC', bank.bank + ' · ' + bank.ifsc], ['Name as per bank', bank.beneficiary], ...(bank.cheque ? [['Cancelled cheque', bank.cheque.name]] : [])] : []],
       ['GST & entity documents', 4, gst.ok ? [['GSTIN', gst.skipped ? 'Not GST registered' : gst.gstin], ...docs.map(([key, f]) => [DOC_LABEL[key] || key, f.name])] : []],
     ];
@@ -669,7 +767,7 @@
       <div class="row end"><${Btn} kind="primary" disabled=${!decl || !tnc || !ready} onClick=${() => {
         updApp((ag, st) => {
           ag.consents = { declaration: true, terms: true, at: nowISO() };
-          ag.appStatus = 'Submitted'; ag.submittedAt = nowISO(); ag.ref = ag.ref || ('LAMF-APP-' + String(Math.floor(100000 + Math.random() * 900000)));
+          ag.appStatus = 'Submitted'; ag.submittedAt = nowISO(); ag.ref = ag.ref || nextRef();
           ag.qc = null; ag.reapply = false;
           ag.timeline.push({ ts: ag.submittedAt, status: 'Submitted' });
           notify(st, 'Application ' + ag.ref + ' submitted. We will verify your details within 2 working days.', 'SMS · Email');
@@ -721,9 +819,9 @@
       setStep('redirect'); await sleep(2200);
       setStep('signing'); await sleep(1600);
       updApp((ag, st) => {
-        const code = 'LAMF-AG' + String(1100 + (parseInt(String(ag.ref).replace(/\D/g, '').slice(-3), 10) || 0));
-        ag.agreement = { signedAt: nowISO(), docId: 'ESG' + Math.floor(1e7 + Math.random() * 9e7), agentCode: code, tempPassword: 'Welcome@123' }; // prototype: SMS is simulated, so every temporary password is Welcome@123
-        notify(st, 'Agreement signed. Your partner account is active. User ID ' + code + ', temporary password sent by SMS.', 'SMS · Email');
+        const code = nextAgentCode();
+        ag.agreement = { signedAt: nowISO(), docId: 'ESG' + Math.floor(1e7 + Math.random() * 9e7), agentCode: code, tempPassword: 'Welcome@123' }; // prototype: email is simulated, so every temporary password is Welcome@123
+        notify(st, 'Agreement signed. Your partner account is active. User ID ' + ag.email + ', temporary password sent by email.', 'SMS · Email');
       });
       onClose();
     }
@@ -749,42 +847,37 @@
     const approved = a.appStatus === 'Approved', rejected = a.appStatus === 'Rejected';
     const signed = approved && a.agreement && a.agreement.signedAt ? a.agreement : null;
     const [signing, setSigning] = useState(false);
-    const company = a.entity === 'Company';
-    const journeySteps = company ? STEPS.filter((t) => t !== 'KYC verification') : STEPS;
-    const stages = approved
-      ? [
-        ...journeySteps.map((t) => ({ t, d: t === 'Review & submit' ? 'Submitted · ' + fdt(a.submittedAt) : 'Completed', state: 'done' })),
-        { t: 'Application approved', d: fdt(qc.at), state: 'done' },
-        { t: signed ? 'E-agreement signed' : 'Sign e-agreement', d: signed ? 'Signed · ' + fdt(signed.signedAt) : 'E-sign via DigiLocker to activate your account.', state: signed ? 'done' : 'current', action: !signed },
-      ]
-      : [
-        { t: company ? 'Entity & PAN' : 'KYC verified', d: company ? 'KYC is not required for a company' : (a.kyc.aadhaar && a.kyc.aadhaar.at ? 'Aadhaar via DigiLocker · ' + fdt(a.kyc.aadhaar.at) : 'Done'), state: 'done' },
-        { t: 'Submitted', d: fdt(a.submittedAt), state: 'done' },
-        { t: 'Application review', d: rejected ? 'Reviewed · ' + fdt(qc.at) : 'Our team is checking your bank account and documents.', state: rejected ? 'done' : 'current' },
-        rejected
-          ? { t: 'Not approved', d: qc.reason + (qc.remarks ? ': ' + qc.remarks : ''), state: 'rejected' }
-          : { t: 'Approved', d: 'We send you the partner e-agreement to sign.', state: 'pending' },
-      ];
+    const firm = isFirm(a.entity);
+    const stages = [
+      ...(firm ? [] : [{ t: 'KYC verified', d: a.kyc.aadhaar && a.kyc.aadhaar.at ? 'Aadhaar via DigiLocker · ' + fdt(a.kyc.aadhaar.at) : 'Done', state: 'done' }]),
+      { t: 'Submitted', d: fdt(a.submittedAt), state: 'done' },
+      { t: 'Application review', d: rejected ? 'Reviewed · ' + fdt(qc.at) : approved ? 'Reviewed · ' + fdt(qc.at) : 'Our team is checking your application.', state: approved || rejected ? 'done' : 'current' },
+      rejected
+        ? { t: 'Not approved', d: (qc.reason || 'Not approved') + (qc.remarks ? ': ' + qc.remarks : ''), state: 'rejected' }
+        : { t: 'Approved', d: signed ? 'E-agreement signed · ' + fdt(signed.signedAt) : approved ? 'Sign the e-agreement to activate your account.' : 'We send you the partner e-agreement to sign.', state: approved ? 'done' : 'pending', action: approved && !signed },
+    ];
     return html`<div class="content-narrow">
       ${signed ? html`<div class="card success mb">
           <${SuccessMark} />
           <h1>You're now a partner!</h1>
           <p class="muted" style="margin:6px 0 14px">Agreement signed on ${fdt(signed.signedAt)}. Your partner account is active.</p>
-          <div class="agent-id"><span class="small muted">Agent ID / User ID</span><b class="mono">${signed.agentCode}</b>
+          <div class="agent-id"><span class="small muted">Agent ID</span><b class="mono">${signed.agentCode}</b>
             <${Btn} sm onClick=${() => { try { navigator.clipboard.writeText(signed.agentCode); } catch (e) { /* ignore */ } toast('Agent ID copied'); }}>Copy<//></div>
-          <p class="small muted" style="margin:10px 0 0">Your temporary password has been emailed to ${a.email}. You'll set your own password the first time you sign in.</p>
+          <p class="small" style="margin:10px 0 0">User ID <b class="mono">${a.email}</b></p>
+          <p class="small muted" style="margin:6px 0 0">Your temporary password has been emailed to ${a.email}. You'll set your own password the first time you sign in.</p>
           <div class="row mt" style="justify-content:center">
-            <a class="btn primary" href=${AGENT_PORTAL_URL + '?id=' + signed.agentCode} target="_blank" rel="noopener">Open agent portal ↗</a>
+            <a class="btn primary" href=${AGENT_PORTAL_URL + '?id=' + encodeURIComponent(a.email)} target="_blank" rel="noopener">Open agent portal ↗</a>
             <${Btn} onClick=${() => UI.printHTML('Signed partner agreement', agreementHTML(a, signed))}>Download signed agreement<//>
           </div>
         </div>
         <${Card} title="How to use your Agent ID" cls="mb">
           <ol class="howto">
-            <li><b>Open the agent portal</b> with the button above, or <a href=${AGENT_PORTAL_URL + '?id=' + signed.agentCode} target="_blank" rel="noopener">open the agent portal sign-in</a>.</li>
-            <li><b>Sign in</b> with your User ID <b class="mono">${signed.agentCode}</b> and the temporary password emailed to you.</li>
+            <li><b>Open the agent portal</b> with the button above, or <a href=${AGENT_PORTAL_URL + '?id=' + encodeURIComponent(a.email)} target="_blank" rel="noopener">open the agent portal sign-in</a>.</li>
+            <li><b>Sign in</b> with your User ID <b class="mono">${a.email}</b> and the temporary password emailed to you.</li>
             <li><b>Set a new password</b> when asked. From then on, sign in with your User ID and that password.</li>
             <li><b>Add customer leads</b> and share your application link. Every application is tagged to your Agent ID.</li>
-            <li><b>Track</b> applications, disbursals and commission payouts from your dashboard.</li>          </ol>
+            <li><b>Track</b> applications, sanctions and disbursals from your dashboard.</li>
+          </ol>
         <//>`
       : approved ? html`<div class="card success mb">
           <${SuccessMark} />
@@ -796,7 +889,7 @@
           <div class="tick" aria-hidden="true">✕</div>
           <h1>Application not approved</h1>
           <p class="muted" style="margin:6px 0 0">Reference <b class="mono">${a.ref}</b>. Reason: <b>${qc.reason}</b>${qc.remarks ? '. ' + qc.remarks : ''}</p>
-          <p class="small muted" style="margin:8px 0 14px">Correct the details and submit the application again.</p>
+          <p class="small muted" style="margin:8px 0 14px">For help, call 1800-000-000 or email partners@lamf.example. You can correct the details and submit again.</p>
           <div class="row" style="justify-content:center"><${Btn} kind="primary" onClick=${() => updApp((ag) => { ag.appStatus = 'Draft'; ag.qc = null; ag.reapply = true; })}>Fix and reapply<//></div>
         </div>`
       : html`<div class="card success mb">

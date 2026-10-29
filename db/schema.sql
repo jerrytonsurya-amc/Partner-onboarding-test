@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS applications (
   pan TEXT NOT NULL DEFAULT '',
   profession TEXT NOT NULL DEFAULT '',
   profession_detail TEXT NOT NULL DEFAULT '',
+  arn TEXT NOT NULL DEFAULT '',
   app_status TEXT NOT NULL DEFAULT 'Draft' REFERENCES application_statuses(name),
   gst_registered INTEGER NOT NULL DEFAULT 0,
   address TEXT NOT NULL DEFAULT '',
@@ -169,7 +170,8 @@ CREATE TABLE IF NOT EXISTS qc_decisions (
   remarks TEXT,
   eagreement_sent_at TEXT,
   sent_to_email TEXT,
-  sent_to_mobile TEXT
+  sent_to_mobile TEXT,
+  checklist TEXT
 );
 
 CREATE TABLE IF NOT EXISTS interest_share_rules (
@@ -243,6 +245,7 @@ CREATE TABLE IF NOT EXISTS leads (
   product TEXT NOT NULL REFERENCES products(name),
   status TEXT NOT NULL REFERENCES lead_statuses(name),
   disbursed_amount REAL,
+  sanctioned_amount REAL,
   created_at TEXT NOT NULL,
   sort_order INTEGER NOT NULL DEFAULT 0
 );

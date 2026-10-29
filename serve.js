@@ -5,6 +5,7 @@ const path = require('path');
 require('./lib/env');
 const db = require('./lib/db');
 const digio = require('./lib/digio');
+const otp = require('./lib/otp');
 const { renderSchemaPage, schemaToCsv } = require('./lib/schemaPage');
 const { schemaToPdf } = require('./lib/schemaPdf');
 
@@ -63,6 +64,8 @@ async function handleApi(req, res, urlPath) {
   }
   if (req.method === 'GET' && urlPath === '/api/agent') return sendJson(res, 200, db.getAgentState());
   if (req.method === 'PUT' && urlPath === '/api/agent') return sendJson(res, 200, db.saveAgentState(await readBody(req)));
+  if (req.method === 'POST' && urlPath === '/api/otp/send') return sendJson(res, 200, await otp.send(await readBody(req)));
+  if (req.method === 'POST' && urlPath === '/api/otp/verify') return sendJson(res, 200, otp.verify(await readBody(req)));
   if (req.method === 'GET' && urlPath === '/api/kyc/config') return sendJson(res, 200, digio.configStatus());
   if (req.method === 'POST' && urlPath === '/api/kyc/pan') return sendJson(res, 200, await digio.verifyPan(await readBody(req)));
   if (req.method === 'POST' && urlPath === '/api/kyc/gst') return sendJson(res, 200, await digio.verifyGst(await readBody(req)));

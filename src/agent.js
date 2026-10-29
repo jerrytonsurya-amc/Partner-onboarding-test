@@ -8,12 +8,12 @@
   const d = (s) => new Date(s).toISOString();
 
   /* Built-in demo partner so the portal can be tried without onboarding first. */
-  const DEMO = { agentCode: 'LAMF-AG1101', name: 'Priya Venkatesh', mobile: '9600034567', email: 'priya.v@example.com', pan: 'DEFPV2468M', entity: 'Individual', demo: true, tempPassword: 'Welcome@123' };
+  const DEMO = { agentCode: 'SCL-AG-000001', name: 'Priya Venkatesh', mobile: '9600034567', email: 'priya.v@example.com', pan: 'DEFPV2468M', entity: 'Individual', demo: true, tempPassword: 'Welcome@123' };
   const DEMO_LEADS = [
     { id: 'LD-30018', name: 'Hariprasath V', mobile: '8903263193', pan: 'AWLPH7421F', email: '', product: 'Loan against securities', status: 'Not started', createdAt: d('2026-08-04T17:03:00') },
     { id: 'LD-30022', name: 'Kavitha Raman', mobile: '9841022331', pan: 'BQRPR6612K', email: 'kavitha.r@example.com', product: 'Loan against mutual funds', status: 'In progress', createdAt: d('2026-09-12T11:20:00') },
-    { id: 'LD-30027', name: 'Sanjay Menon', mobile: '9884011245', pan: 'CTMPM2290L', email: '', product: 'Loan against mutual funds', status: 'Disbursed', disbursed: 750000, createdAt: d('2026-09-28T15:45:00') },
-    { id: 'LD-30031', name: 'Deepa Natarajan', mobile: '9790033447', pan: 'DNKPN8823P', email: '', product: 'Loan against mutual funds', status: 'Sanctioned', createdAt: d('2026-10-10T10:05:00') },
+    { id: 'LD-30027', name: 'Sanjay Menon', mobile: '9884011245', pan: 'CTMPM2290L', email: '', product: 'Loan against mutual funds', status: 'Disbursed', sanctioned: 900000, disbursed: 750000, createdAt: d('2026-09-28T15:45:00') },
+    { id: 'LD-30031', name: 'Deepa Natarajan', mobile: '9790033447', pan: 'DNKPN8823P', email: '', product: 'Loan against mutual funds', status: 'Sanctioned', sanctioned: 500000, createdAt: d('2026-10-10T10:05:00') },
   ];
 
   /* ---------- store ---------- */
@@ -97,7 +97,7 @@
   const hashPw = (pw) => { let h = 0x811c9dc5; for (const c of 'lamf:' + pw) { h ^= c.charCodeAt(0); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(16); };
   const PW_RULES = [['At least 8 characters', (p) => p.length >= 8], ['An uppercase letter', (p) => /[A-Z]/.test(p)], ['A lowercase letter', (p) => /[a-z]/.test(p)], ['A number', (p) => /\d/.test(p)], ['A special character', (p) => /[^A-Za-z0-9]/.test(p)]];
   const pwOk = (p) => PW_RULES.every(([, t]) => t(p));
-  const findPartner = (userId) => partners().find((p) => p.agentCode === userId.trim().toUpperCase());
+  const findPartner = (userId) => partners().find((p) => (p.email || '').toLowerCase() === userId.trim().toLowerCase());
 
   function PasswordFields({ pw, setPw, pw2, setPw2, tempPw }) {
     const [show, setShow] = useState(false);
@@ -120,7 +120,7 @@
     const [err, setErr] = useState('');
     const [partner, setPartner] = useState(null);
     const [pw, setPw] = useState(''); const [pw2, setPw2] = useState('');
-    const [fId, setFId] = useState(prefill); const [fSent, setFSent] = useState(false); const [fOtp, setFOtp] = useState(''); const [fOk, setFOk] = useState(false);
+    const [fId, setFId] = useState(prefill); const [fSent, setFSent] = useState(false); const [fOtp, setFOtp] = useState(''); const [fOk, setFOk] = useState(false); const [fBusy, setFBusy] = useState(false); const [fFallback, setFFallback] = useState(false);
     const reset = () => { setErr(''); setPw(''); setPw2(''); };
 
     function login() {
@@ -135,13 +135,42 @@
       update((s) => { s.creds[p.agentCode] = { hash: hashPw(pw), setAt: nowISO(), lastLogin: nowISO() }; s.session = p.agentCode; if (!s.leads[p.agentCode]) s.leads[p.agentCode] = []; });
       toast(firstTime ? 'Password set. Use your User ID and new password from now on.' : 'Password reset. You are signed in.', 'Agent portal');
     }
+    async function sendReset() {
+      const p = findPartner(fId);
+      if (!p) return setErr('No active partner found with this User ID.');
+      if (!/^[6-9]\d{9}$/.test(p.mobile || '')) return setErr('This partner has no mobile number for an OTP.');
+      setFBusy(true); setErr('');
+      try {
+        if (await LamfPersist.ping()) await LamfPersist.post('/api/otp/send', { mobile: p.mobile, purpose: 'agent-reset' });
+        setFFallback(false);
+        setFSent(true);
+      } catch (e) {
+        setFFallback(true);
+        setFSent(true);
+        setErr(e.message || 'Could not send the OTP.');
+      } finally { setFBusy(false); }
+    }
+    async function verifyReset() {
+      const p = findPartner(fId);
+      if (!p) return setErr('No active partner found with this User ID.');
+      setFBusy(true); setErr('');
+      try {
+        if (fFallback) {
+          if (fOtp !== otp()) return setErr('Incorrect OTP');
+        } else if (await LamfPersist.ping()) await LamfPersist.post('/api/otp/verify', { mobile: p.mobile, purpose: 'agent-reset', otp: fOtp });
+        else if (fOtp !== otp()) return setErr('Incorrect OTP');
+        setFOk(true); reset();
+      } catch (e) {
+        setErr(e.message || 'Incorrect OTP');
+      } finally { setFBusy(false); }
+    }
 
     const card = (body) => html`<div class="ap-login"><div class="card stack ap-login-card">
       <img class="brand-logo" src=${window.BRAND_LOGO} alt="Shriram Credit" style="height:40px;align-self:flex-start" />${body}</div></div>`;
 
     if (view === 'reset') return card(html`
       <div><h1>Set a new password</h1><p class="muted" style="margin:4px 0 0">This is your first login, so please replace your temporary password.</p></div>
-      <${KV} items=${[['User ID', html`<b class="mono">${partner.agentCode}</b>`], ['Name', partner.name]]} />
+      <${KV} items=${[['User ID', html`<b class="mono">${partner.email}</b>`], ['Name', partner.name]]} />
       <${PasswordFields} pw=${pw} setPw=${setPw} pw2=${pw2} setPw2=${setPw2} tempPw=${partner.tempPassword} />
       <${Btn} kind="primary" disabled=${!pwOk(pw) || pw !== pw2 || pw === partner.tempPassword} onClick=${() => savePassword(partner, true)}>Set password & continue<//>`);
 
@@ -149,24 +178,29 @@
       const p = findPartner(fId);
       return card(html`
         <div><h1>Forgot password</h1><p class="muted" style="margin:4px 0 0">We'll send an OTP to your registered mobile number.</p></div>
-        <${Input} label="User ID" value=${fId} onChange=${(v) => { setFId(v); setFSent(false); setFOtp(''); setFOk(false); setErr(''); }} placeholder="e.g. LAMF-AG1101" disabled=${fOk} />
-        ${!fSent && html`<${Btn} kind="primary" disabled=${!fId.trim()} onClick=${() => (p ? (setFSent(true), setErr('')) : setErr('No active partner found with this User ID.'))}>Send OTP<//>`}
-        ${fSent && !fOk && html`<${Note} tone="info">OTP sent to the mobile registered for ${p.agentCode} (XXXXXX${p.mobile.slice(-4)}).<//>
-          <${UI.OtpBoxes} value=${fOtp} onChange=${(v) => { setFOtp(v); setErr(''); }} autoFocus />
-          <${Btn} kind="primary" disabled=${fOtp.length !== 6} onClick=${() => (fOtp === otp() ? (setFOk(true), reset()) : setErr('Incorrect OTP'))}>Verify OTP<//>`}
+        <${Input} label="User ID" value=${fId} onChange=${(v) => { setFId(v); setFSent(false); setFOtp(''); setFOk(false); setFFallback(false); setErr(''); }} placeholder="name@example.com" disabled=${fOk} />
+        ${!fSent && html`<${Btn} kind="primary" disabled=${!fId.trim() || fBusy} onClick=${sendReset}>${fBusy ? 'Sending OTP…' : 'Send OTP'}<//>`}
+        ${fSent && !fOk && html`<div class="stack">
+          ${fFallback
+            ? html`<${Note} tone="warn">${err || 'SMS could not be sent.'} Enter 000000 to continue.<//>`
+            : html`<${Note} tone="info">OTP sent to the mobile registered for ${p.agentCode} (XXXXXX${p.mobile.slice(-4)}). It is valid for 120 seconds.<//>`}
+          <${UI.OtpBoxes} value=${fOtp} onChange=${(v) => { setFOtp(v); if (!fFallback) setErr(''); }} autoFocus />
+          <${Btn} kind="primary" disabled=${fBusy || fOtp.length !== 6} onClick=${verifyReset}>Verify OTP<//>
+        </div>`}
         ${fOk && html`<${PasswordFields} pw=${pw} setPw=${setPw} pw2=${pw2} setPw2=${setPw2} />
           <${Btn} kind="primary" disabled=${!pwOk(pw) || pw !== pw2} onClick=${() => savePassword(p, false)}>Reset password & sign in<//>`}
-        ${err && html`<${Note} tone="err">${err}<//>`}
-        <${Btn} kind="link" onClick=${() => { setView('login'); setFSent(false); setFOtp(''); setFOk(false); reset(); }}>← Back to sign in<//>`);
+        ${err && !(fSent && fFallback && !fOk) && html`<${Note} tone="err">${err}<//>`}
+        <${Btn} kind="link" onClick=${() => { setView('login'); setFSent(false); setFOtp(''); setFOk(false); setFFallback(false); reset(); }}>← Back to sign in<//>`);
     }
 
     return card(html`
       <div><h1>Agent portal</h1><p class="muted" style="margin:4px 0 0">Sign in with your User ID and password.</p></div>
       <form class="stack" onSubmit=${(e) => { e.preventDefault(); login(); }}>
-        <${Input} label="User ID" value=${userId} onChange=${(v) => { setUserId(v); setErr(''); }} placeholder="Your Agent ID, e.g. LAMF-AG1101" autocomplete="username" />
+        <${Input} label="User ID" value=${userId} onChange=${(v) => { setUserId(v); setErr(''); }} placeholder="Your email ID" autocomplete="username" />
         <${Input} label="Password" type="password" value=${password} onChange=${(v) => { setPassword(v); setErr(''); }} autocomplete="current-password" />
         ${err && html`<${Note} tone="err">${err}<//>`}
         <button class="btn primary" type="submit" disabled=${!userId.trim() || !password}>Sign in</button>
+        <${Btn} kind="link" onClick=${() => { setView('forgot'); setFId(userId); setFSent(false); setFOtp(''); setFOk(false); setErr(''); }}>Forgot password?<//>
       </form>
 `);
   }
@@ -240,20 +274,21 @@
         </div>
       </div>
       <div class="ap-table-wrap"><table class="ap-table ap-leads">
-        <colgroup><col class="w-date" /><col class="w-name" /><col class="w-prod" /><col class="w-status" /><col class="w-amt" /><col class="w-mob" /><col class="w-pan" /><col class="w-act" /></colgroup>
+        <colgroup><col class="w-date" /><col class="w-name" /><col class="w-prod" /><col class="w-status" /><col class="w-amt" /><col class="w-amt" /><col class="w-mob" /><col class="w-pan" /><col class="w-act" /></colgroup>
         <thead><tr><th>Generated Date</th><th>Client Name</th>
           <th><label class="th-filter">Product <${Icon} n="chevron" size=${14} /><select value=${prod} onChange=${(e) => setProd(e.target.value)} aria-label="Filter by product">${['All', ...PRODUCTS].map((p) => html`<option key=${p} value=${p}>${p === 'All' ? 'All products' : p}</option>`)}</select></label></th>
-          <th>Status</th><th>Disbursed amount</th><th>Contact Number</th><th>PAN Number</th><th>Actions</th></tr></thead>
+          <th>Status</th><th>Sanctioned amount</th><th>Disbursed amount</th><th>Contact Number</th><th>PAN Number</th><th>Actions</th></tr></thead>
         <tbody>${leads.length ? leads.map((l) => html`<tr key=${l.id}>
             <td class="nowrap">${genDate(l.createdAt)}</td>
             <td>${l.name}</td>
             <td><span class="ap-chip">${l.product}</span></td>
             <td><span class=${'ap-pill ' + TONE[l.status]}>${l.status}</span></td>
+            <td class="amt">${(l.status === 'Sanctioned' || l.status === 'Disbursed') && l.sanctioned ? html`<b>${inr(l.sanctioned)}</b>` : html`<span class="muted">—</span>`}</td>
             <td class="amt">${l.status === 'Disbursed' && l.disbursed ? html`<b>${inr(l.disbursed)}</b>` : html`<span class="muted">—</span>`}</td>
             <td class="nowrap">${l.mobile ? '+91' + l.mobile : '—'}</td>
             <td class="pan">${l.pan}</td>
             <td><button class="ap-link" onClick=${() => setModal({ share: l })}>Share Link</button></td>
-          </tr>`) : html`<tr><td colspan="8" class="ap-empty">${all.length ? (status !== 'All' && !q && prod === 'All' ? 'No leads are ' + status.toLowerCase() + ' yet.' : 'No leads match your search.') : 'No leads yet. Create your first lead or share your unique link.'}</td></tr>`}</tbody>
+          </tr>`) : html`<tr><td colspan="9" class="ap-empty">${all.length ? (status !== 'All' && !q && prod === 'All' ? 'No leads are ' + status.toLowerCase() + ' yet.' : 'No leads match your search.') : 'No leads yet. Create your first lead or share your unique link.'}</td></tr>`}</tbody>
       </table></div>
       ${modal === 'share' && html`<${ShareLinkModal} title="Share unique link" link=${leadLink(null, a.agentCode)} onClose=${() => setModal(null)} />`}
       ${modal && modal.share && html`<${ShareLinkModal} title=${'Share link with ' + modal.share.name} link=${leadLink(modal.share, a.agentCode)} mobile=${modal.share.mobile} onClose=${() => setModal(null)} />`}

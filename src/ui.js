@@ -159,7 +159,7 @@
     useEffect(() => { if (!value) setD(['', '', '', '', '', '']); }, [value]);
     const emit = (n) => { setD(n); onChange(n.join('')); };
     const put = (k, str) => {
-      const digits = str.replace(/D/g, ''); if (!digits) return;
+      const digits = str.replace(/\D/g, ''); if (!digits) return;
       const n = d.slice(); let j = k;
       for (const c of digits) { if (j > 5) break; n[j++] = c; }
       emit(n); const f = refs.current[Math.min(j, 5)]; if (f) f.focus();
