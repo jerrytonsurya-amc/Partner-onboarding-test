@@ -78,7 +78,9 @@
   }
   function adopt(next) {
     if (!next || saver.busy()) return;
-    if (JSON.stringify(state.apps) === JSON.stringify(next.apps)) return;
+    const sameApps = JSON.stringify(state.apps) === JSON.stringify(next.apps);
+    const sameLeads = JSON.stringify(state.partnerLeads || []) === JSON.stringify(next.partnerLeads || []);
+    if (sameApps && sameLeads) return;
     state = next;
     subs.forEach((f) => f());
   }
@@ -272,7 +274,7 @@
       <//></div>`}
       <div class="stack">
         <div class="grid g2">
-          <${Card} title="Applicant"><${KV} items=${[['Reference', x.ref], ['Entity type', entityLabel(x)], ['Profession', professionLabel(x)], [person(x) ? 'Name' : 'Entity name', x.name], [person(x) ? 'Date of birth' : 'Date of incorporation', fd(x.dob)], ['Mobile', html`${x.mobile} <span class="ok-t"><${UI.Tick} size="16" label="Verified" /></span>`], ['Email', html`<span class="one-line">${x.email}</span> <span class="ok-t"><${UI.Tick} size="16" label="Verified" /></span>`]]} /><//>
+          <${Card} title="Applicant"><${KV} items=${[['Reference', x.ref], ...(x.partnerType ? [['Partner type', x.partnerType]] : []), ['Entity type', entityLabel(x)], ['Profession', professionLabel(x)], [person(x) ? 'Name' : 'Entity name', x.name], [person(x) ? 'Date of birth' : 'Date of incorporation', fd(x.dob)], ['Mobile', html`${x.mobile} <span class="ok-t"><${UI.Tick} size="16" label="Verified" /></span>`], ['Email', html`<span class="one-line">${x.email}</span> <span class="ok-t"><${UI.Tick} size="16" label="Verified" /></span>`]]} /><//>
           <${Card} title="PAN"><${KV} items=${[['PAN', html`<span class="mono">${x.pan}</span>`], ['Name as per PAN', k.pan.name], [person(x) ? 'DOB as per PAN' : 'Incorporation as per PAN', fd(k.pan.dob)], ['Holder type', k.pan.type]]} /><//>
         </div>
         ${firm ? html`<${Card} title="KYC information"><p class="muted" style="margin:0">Not applicable</p><//>` : html`<${Card} title=${'KYC information' + (ad.signatory ? ' · authorised signatory' : '')}>
@@ -301,18 +303,55 @@
     </div>`;
   }
 
+  function partnerLeads() {
+    const list = (state.partnerLeads || []).slice();
+    if (!remote) {
+      try {
+        JSON.parse(localStorage.getItem('lamf-partner-leads') || '[]').forEach((lead) => {
+          if (!list.some((x) => x.id === lead.id)) list.push(lead);
+        });
+      } catch (e) { /* ignore */ }
+    }
+    return list.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  }
+
+  function LeadList() {
+    useStore();
+    const [q, setQ] = useState('');
+    const leads = partnerLeads().filter((x) => !q || [x.firstName, x.lastName, x.email, x.companyName, x.category, x.mobile, x.comments].join(' ').toLowerCase().includes(q.toLowerCase()));
+    return html`<div class="content-narrow">
+      <div class="page-h"><div><h1>Partner leads</h1><p>Lending platform enquiries submitted from onboarding.</p></div></div>
+      <div class="card">
+        <div class="row mb">
+          <input type="search" placeholder="Search by name, email, company or comments" aria-label="Search leads" value=${q} onInput=${(e) => setQ(e.target.value)} style="flex:1;min-width:220px" />
+        </div>
+        <${Table} rows=${leads} empty="No partner leads yet." cols=${[
+          { h: 'Submitted', k: 'at', r: (x) => html`<span class="nowrap">${fd(x.createdAt)}</span><div class="small muted">${new Date(x.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</div>` },
+          { h: 'Partner type', k: 'category' },
+          { h: 'Name', k: 'name', r: (x) => html`<b>${x.firstName} ${x.lastName}</b>` },
+          { h: 'Email', k: 'email', r: (x) => html`<span class="one-line">${x.email}</span>` },
+          { h: 'Company', k: 'company', r: (x) => x.companyName },
+          { h: 'Mobile', k: 'mobile', r: (x) => x.mobile || '—' },
+          { h: 'Comments', k: 'comments', r: (x) => x.comments || '—' },
+        ]} />
+      </div>
+    </div>`;
+  }
+
   /* ======================= SHELL ======================= */
   // Light theme only.
   document.documentElement.setAttribute('data-theme', 'light');
 
-  function Menu({ onClose, onApproval, onReset }) {
+  function Menu({ view, onClose, onApproval, onLeads, onReset }) {
     useStore();
     const pendingCount = allApps().filter((x) => statusOf(x) === 'Pending').length;
+    const leadCount = partnerLeads().length;
     useEffect(() => { const f = (e) => e.key === 'Escape' && onClose(); window.addEventListener('keydown', f); return () => window.removeEventListener('keydown', f); }, []);
     return html`<div class="drawer-bg" onMouseDown=${(e) => e.target === e.currentTarget && onClose()}>
       <nav class="drawer" aria-label="Main menu">
         <div class="drawer-h"><span class="brand-btn"><img class="brand-logo" src=${window.BRAND_LOGO} alt="Shriram Credit" /><span class="brand-sub">Approver panel<small>${APPROVER}</small></span></span><button class="x" aria-label="Close menu" onClick=${onClose}>×</button></div>
-        <a href="#" class="drawer-item on" onClick=${(e) => { e.preventDefault(); onApproval(); }}><span>Approval</span>${pendingCount > 0 && html`<span class="count">${pendingCount}</span>`}</a>
+        <a href="#" class=${'drawer-item' + (view === 'approval' ? ' on' : '')} onClick=${(e) => { e.preventDefault(); onApproval(); }}><span>Approval</span>${pendingCount > 0 && html`<span class="count">${pendingCount}</span>`}</a>
+        <a href="#" class=${'drawer-item' + (view === 'leads' ? ' on' : '')} onClick=${(e) => { e.preventDefault(); onLeads(); }}><span>Leads</span>${leadCount > 0 && html`<span class="count">${leadCount}</span>`}</a>
         <div class="drawer-sep"></div>
         <a href="#" class="drawer-item" onClick=${(e) => { e.preventDefault(); onReset(); }}><span>Reset sample data</span></a>
       </nav>
@@ -320,17 +359,19 @@
   }
 
   function App() {
+    const [screen, setScreen] = useState('approval');
     const [open, setOpen] = useState(null);
     const [menu, setMenu] = useState(false);
-    const toList = () => { setOpen(null); setMenu(false); window.scrollTo(0, 0); };
+    const toList = () => { setScreen('approval'); setOpen(null); setMenu(false); window.scrollTo(0, 0); };
+    const toLeads = () => { setScreen('leads'); setOpen(null); setMenu(false); window.scrollTo(0, 0); };
     return html`<div class="shell">
       <header class="top">
         <button class="btn sm burger" aria-label="Open menu" aria-expanded=${menu} onClick=${() => setMenu(true)}><span aria-hidden="true">☰</span></button>
         <button class="brand-btn" onClick=${toList} aria-label="Approvals home"><img class="brand-logo" src=${window.BRAND_LOGO} alt="Shriram Credit" /></button>
         <div class="grow"></div>
       </header>
-      ${menu && html`<${Menu} onClose=${() => setMenu(false)} onApproval=${toList} onReset=${() => { if (confirm('Reset the sample applications? The live application is not affected.')) { if (remote) { saver.run(() => LamfPersist.post('/api/approver/reset', {})).then((saved) => { state = saved; emit(); toList(); }).catch(() => toast('Could not reset sample data.', 'Database')); } else { state = seed(); save(); emit(); toList(); } } }} />`}
-      <main>${open ? html`<${Review} key=${open.id} id=${open.id} live=${open.live} onBack=${toList} />` : html`<${QcList} onOpen=${(x) => { setOpen({ id: x.id, live: !!x.live }); window.scrollTo(0, 0); }} />`}</main>
+      ${menu && html`<${Menu} view=${open ? 'approval' : screen} onClose=${() => setMenu(false)} onApproval=${toList} onLeads=${toLeads} onReset=${() => { if (confirm('Reset the sample applications? The live application is not affected.')) { if (remote) { saver.run(() => LamfPersist.post('/api/approver/reset', {})).then((saved) => { state = saved; emit(); toList(); }).catch(() => toast('Could not reset sample data.', 'Database')); } else { state = seed(); save(); emit(); toList(); } } }} />`}
+      <main>${open ? html`<${Review} key=${open.id} id=${open.id} live=${open.live} onBack=${toList} />` : screen === 'leads' ? html`<${LeadList} />` : html`<${QcList} onOpen=${(x) => { setOpen({ id: x.id, live: !!x.live }); window.scrollTo(0, 0); }} />`}</main>
       <${UI.Toasts} />
     </div>`;
   }

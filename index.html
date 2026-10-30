@@ -1022,6 +1022,8 @@ td{color:#1d1d1f}
     Partnership: ['Mutual fund distribution', 'Chartered accountancy firm', 'General Business', 'Others'],
     Company: ['Mutual fund distribution', 'Chartered accountancy firm', 'General Business', 'Others'],
   };
+  const PARTNER_TYPES = ['Mutual Fund Distributors', 'Lending Platforms', 'Stock Brokers', 'Financial Superapps', 'Wealth Managers'];
+  const LEAD_PARTNER_TYPE = 'Lending Platforms';
   const isPerson = (entity) => entity === 'Individual' || entity === 'Proprietor';
   const isFirm = (entity) => entity === 'Partnership' || entity === 'Company';
   const IFSC = { SBIN: 'State Bank of India', HDFC: 'HDFC Bank', ICIC: 'ICICI Bank', UTIB: 'Axis Bank', KKBK: 'Kotak Mahindra Bank', IOBA: 'Indian Overseas Bank', IDIB: 'Indian Bank', CNRB: 'Canara Bank', BARB: 'Bank of Baroda', PUNB: 'Punjab National Bank' };
@@ -1106,7 +1108,7 @@ td{color:#1d1d1f}
   const stepDone = (idx, fn) => updApp((a, s) => { fn(a, s); a.step = Math.max(a.step || 0, idx + 1); });
 
   const { html, useState, useEffect, useRef, useStore, fdt, fd, sleep, otp } = UI;
-  const { Badge, Btn, Card, Input, KV, Note, FileIn } = UI;
+  const { Badge, Btn, Card, Input, Text, KV, Note, FileIn } = UI;
   const PAN_RE = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
   const IFSC_RE = /^[A-Z]{4}0[A-Z0-9]{6}$/;
   const GST_RE = /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
@@ -1400,6 +1402,7 @@ td{color:#1d1d1f}
   const hashOf = (str, seed) => [...String(str)].reduce((t, c) => (Math.imul(t, 31) + c.charCodeAt(0)) >>> 0, seed || 7);
 
   function StepPAN({ a, next, idx }) {
+    const [partnerType, setPartnerType] = useState(a.partnerType || '');
     const [entity, setEntity] = useState(a.entity === 'Proprietor' ? 'Individual' : (a.entity || 'Individual'));
     const [profession, setProfession] = useState(a.profession || '');
     const [professionOther, setProfessionOther] = useState(a.profession === 'Others' ? (a.professionDetail || '') : '');
@@ -1408,12 +1411,19 @@ td{color:#1d1d1f}
     const [pan, setPan] = useState(a.pan || '');
     const [busy, setBusy] = useState(false);
     const [res, setRes] = useState(a.kyc.pan && a.kyc.pan.status ? a.kyc.pan : null);
+    const [lead, setLead] = useState({ first: '', last: '', email: '', company: '', comments: '' });
+    const [leadBusy, setLeadBusy] = useState(false);
+    const [leadDone, setLeadDone] = useState(false);
+    const [leadErr, setLeadErr] = useState('');
     const valid = PAN_RE.test(pan);
     const person = isPerson(entity);
     const firm = isFirm(entity);
+    const leadType = partnerType === LEAD_PARTNER_TYPE;
     const professions = PROFESSIONS[entity] || PROFESSIONS.Individual;
     const expected = { Individual: 'P', Partnership: 'F', Company: 'C' }[entity];
     const mismatch = valid && pan[3] !== expected;
+    const emailOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(lead.email.trim());
+    const leadReady = !!(lead.first.trim() && lead.last.trim() && emailOk && lead.company.trim());
     function chooseEntity(value) {
       setEntity(value);
       setRes(null);
@@ -1423,6 +1433,11 @@ td{color:#1d1d1f}
         setProfessionOther('');
       }
       if (!isFirm(value)) setIncorporated('');
+    }
+    function choosePartner(value) {
+      setPartnerType(value);
+      setLeadDone(false);
+      setLeadErr('');
     }
     async function verify() {
       setBusy(true); setRes(null);
@@ -1438,13 +1453,58 @@ td{color:#1d1d1f}
       }
       setBusy(false);
     }
+    async function submitLead() {
+      if (!leadReady || leadBusy) return;
+      setLeadBusy(true); setLeadErr('');
+      try {
+        const body = {
+          category: partnerType,
+          firstName: lead.first.trim(),
+          lastName: lead.last.trim(),
+          email: lead.email.trim(),
+          companyName: lead.company.trim(),
+          comments: lead.comments.trim(),
+          mobile: a.mobile || '',
+        };
+        if (await LamfPersist.ping()) await LamfPersist.post('/api/partner-leads', body);
+        else {
+          const key = 'lamf-partner-leads';
+          const list = JSON.parse(localStorage.getItem(key) || '[]');
+          list.unshift(Object.assign({ id: 'PL' + Date.now().toString(36).toUpperCase(), createdAt: nowISO() }, body));
+          localStorage.setItem(key, JSON.stringify(list));
+        }
+        setLeadDone(true);
+        toast('Details submitted.', partnerType);
+      } catch (err) {
+        setLeadErr(err.message || 'Could not save these details.');
+      }
+      setLeadBusy(false);
+    }
     const panLabel = entity === 'Partnership' ? 'PAN number of the partnership' : entity === 'Company' ? 'PAN number of the company' : 'PAN number';
     const needsArn = profession === 'Mutual fund distributor' || profession === 'Mutual fund distribution';
     const specified = profession !== 'Others' || !!professionOther.trim();
     const arnOk = !needsArn || /^ARN\d{3,8}$/.test(arn);
-    const canContinue = !!(res && res.ok && profession && specified && arnOk && (!firm || incorporated));
+    const canContinue = !!(partnerType && !leadType && res && res.ok && profession && specified && arnOk && (!firm || incorporated));
     return html`<div class="stack">
       <h2>Step 2 · Entity type & PAN</h2>
+      <div class="field"><span>What best describes you?</span><div class="chips">${PARTNER_TYPES.map((p) => html`<button key=${p} class=${'chip' + (partnerType === p ? ' on' : '')} onClick=${() => choosePartner(p)}>${p}</button>`)}</div></div>
+      ${leadType && (leadDone
+        ? html`<${Note} tone="ok">Thank you. Your details have been shared with our team.<//>`
+        : html`<div class="stack">
+            <p class="muted" style="margin:0">Tell us about your lending platform. Our team will get in touch.</p>
+            <div class="grid g2">
+              <${Input} label="First name" value=${lead.first} onChange=${(v) => setLead(Object.assign({}, lead, { first: v.slice(0, 80) }))} />
+              <${Input} label="Last name" value=${lead.last} onChange=${(v) => setLead(Object.assign({}, lead, { last: v.slice(0, 80) }))} />
+            </div>
+            <div class="grid g2">
+              <${Input} label="Email" type="email" value=${lead.email} onChange=${(v) => setLead(Object.assign({}, lead, { email: v.slice(0, 120) }))} placeholder="name@company.com" err=${lead.email && !emailOk ? 'Enter a valid email' : ''} />
+              <${Input} label="Company name" value=${lead.company} onChange=${(v) => setLead(Object.assign({}, lead, { company: v.slice(0, 120) }))} />
+            </div>
+            <${Text} label="Comments" value=${lead.comments} onChange=${(v) => setLead(Object.assign({}, lead, { comments: v.slice(0, 1000) }))} placeholder="Optional" />
+            ${leadErr && html`<${Note} tone="err">${leadErr}<//>`}
+            <div class="row end"><${Btn} kind="primary" disabled=${!leadReady || leadBusy} onClick=${submitLead}>${leadBusy ? 'Submitting…' : 'Submit'}<//></div>
+          </div>`)}
+      ${partnerType && !leadType && html`<div class="stack">
       <div class="field"><span>Entity type</span><div class="chips">${ENTITIES.map((e) => html`<button key=${e.value} class=${'chip' + ((e.value === 'Individual' ? person : entity === e.value) ? ' on' : '')} onClick=${() => chooseEntity(e.value)}>${e.label}</button>`)}</div></div>
       <div class="field"><span>What best describes your profession?</span><div class="chips">${professions.map((p) => html`<button key=${p} class=${'chip' + (profession === p ? ' on' : '')} onClick=${() => { setProfession(p); if (p !== 'Others') setProfessionOther(''); }}>${p}</button>`)}</div></div>
       ${profession === 'Others' && html`<${Input} label="Please specify your profession" value=${professionOther} onChange=${(v) => setProfessionOther(v.slice(0, 80))} placeholder="e.g. Wealth advisory" />`}
@@ -1463,6 +1523,7 @@ td{color:#1d1d1f}
       ${busy && html`<${UI.LoaderPop} text="Verifying your PAN…" sub="This takes a few seconds. Please don't close this window." />`}
       <div class="row end"><${Btn} kind="primary" disabled=${!canContinue} onClick=${() => {
         stepDone(idx, (ag) => {
+          ag.partnerType = partnerType;
           ag.entity = entity; ag.profession = profession; ag.professionDetail = profession === 'Others' ? professionOther.trim() : ''; ag.arn = needsArn ? arn : ''; ag.pan = pan;
           ag.name = res.name.replace(/\b\w+/g, (w) => w[0] + w.slice(1).toLowerCase()).replace(/\bPvt Ltd\b/i, 'Pvt Ltd').replace(/\bLlp\b/, 'LLP');
           ag.dob = firm ? incorporated : res.dob; ag.kyc.pan = res;
@@ -1471,6 +1532,7 @@ td{color:#1d1d1f}
         });
         next();
       }}>Save & continue →<//></div>
+      </div>`}
     </div>`;
   }
 
@@ -1741,7 +1803,7 @@ td{color:#1d1d1f}
     const docs = Object.entries(k.docs || {}).filter(([, v]) => v);
     const sections = [
       ['Contact details', 0, k.emailOk ? [['Mobile number', a.mobile], ['Email ID', html`<span class="one-line">${a.email}</span>`]] : []],
-      ['Entity & PAN', 1, k.pan.ok ? [['Entity type', entityLabel], ['Profession', a.profession === 'Others' && a.professionDetail ? 'Others — ' + a.professionDetail : (a.profession || '')], ...(a.arn ? [['ARN number', a.arn]] : []), [person ? 'Name as per PAN' : 'Entity name as per PAN', k.pan.name], ['PAN', a.pan], ...(isFirm(a.entity) ? [['Date of incorporation', fd(a.dob)]] : [])] : []],
+      ['Entity & PAN', 1, k.pan.ok ? [['Partner type', a.partnerType || ''], ['Entity type', entityLabel], ['Profession', a.profession === 'Others' && a.professionDetail ? 'Others — ' + a.professionDetail : (a.profession || '')], ...(a.arn ? [['ARN number', a.arn]] : []), [person ? 'Name as per PAN' : 'Entity name as per PAN', k.pan.name], ['PAN', a.pan], ...(isFirm(a.entity) ? [['Date of incorporation', fd(a.dob)]] : [])] : []],
       ['KYC information', 2, skipKyc ? [['KYC verification', 'Not applicable']] : ad.ok ? [['Name as per Aadhaar', ad.name], ['Aadhaar', ad.masked], ['Address', [x.house, x.street, x.city, x.state + ' – ' + x.pin].filter(Boolean).join(', ')]] : []],
       ['Bank account', 3, bank.acc ? [['Account', bank.acc + ' · ' + (bank.type || 'Savings')], ['Bank / IFSC', bank.bank + ' · ' + bank.ifsc], ['Name as per bank', bank.beneficiary], ...(bank.cheque ? [['Cancelled cheque', bank.cheque.name]] : [])] : []],
       ['GST & entity documents', 4, gst.ok ? [['GSTIN', gst.skipped ? 'Not GST registered' : gst.gstin], ...docs.map(([key, f]) => [DOC_LABEL[key] || key, f.name])] : []],

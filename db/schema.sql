@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS applications (
   profession TEXT NOT NULL DEFAULT '',
   profession_detail TEXT NOT NULL DEFAULT '',
   arn TEXT NOT NULL DEFAULT '',
+  partner_type TEXT NOT NULL DEFAULT '',
   app_status TEXT NOT NULL DEFAULT 'Draft' REFERENCES application_statuses(name),
   gst_registered INTEGER NOT NULL DEFAULT 0,
   address TEXT NOT NULL DEFAULT '',
@@ -248,6 +249,18 @@ CREATE TABLE IF NOT EXISTS leads (
   sanctioned_amount REAL,
   created_at TEXT NOT NULL,
   sort_order INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS partner_leads (
+  id TEXT PRIMARY KEY,
+  category TEXT NOT NULL,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  company_name TEXT NOT NULL,
+  comments TEXT NOT NULL DEFAULT '',
+  mobile TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS data_dictionary (
